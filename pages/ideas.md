@@ -3,11 +3,13 @@ layout: page
 title: Missing genome reconstruction
 ---
 
-Let's make a reference graph, align reads to it, and use surjection and k-means clustering to attempt to find the reads that map to the 5th genome. Finally, we'll assemble these and see if it matches known information about the fifth genome.
+## Missing genome reconstruction in HIV
 
-First we'll build and index the graph.
+This file works with the [HIV](pages/HIV_exercises.md) data set, assuming you only have four instead of the five reference genomes.
 
-We build the graph using `vg msga` from the input sequences. (Note that the assembly of these 4 genomes will always be circular, why is this?)
+Let's make a reference graph, align reads to it, and use surjection and k-means clustering to attempt to find the reads that map to the fifth genome. Finally, we'll assemble these and see if it matches known information about the fifth genome.
+
+First we'll build and index the graph, using `vg msga` from the input sequences. (Note that the assembly of these 4 genomes will always be circular, why is this?)
 
 ```
 vg msga -f REF4.fasta -w 1024 -D | vg mod -U 10 - | vg mod -c -  >REF4.vg
@@ -35,7 +37,7 @@ We then map the first 10k Illumina reads:
 vg map -d REF4 -f <(zcat SRR961514_1.fastq.gz | head -40000) >SRR961514_1.first10k.gam
 ```
 
-Our goal is to find the un-assembled genome within the Illumina reads. To do so we will use a technique based on obtaining the path-relative identity for each read against each of our 4 reference genomes. We hypothesize that the reads from the 5th genome will tend to have a unique pattern of relationships between the known genomes, and should show up in clustering analysis.
+Our goal is to find the un-assembled genome within the Illumina reads. To do so, we will use a technique based on obtaining the path-relative identity for each read against each of our four reference genomes. We hypothesize that the reads from the 5th genome will tend to have a unique pattern of relationships between the known genomes, and should show up in a clustering analysis.
 
 First we surject the reads into each one of the references and build a table of the output:
 
@@ -56,8 +58,8 @@ join <(zcat first10k.surj.896.tsv.gz | cut -f 1,3 | sort -V) <(zcat first10k.sur
 | tr ' ' '\t' | gzip >first10k.surj.join.tsv.gz
 ```
 
-In R we can run k-means clustering PCA to evaluate if there is a subset that doesn't match any of the references.
-We take a number of steps to ensure that the PCA makes sense. First, we remove cases where we don't have a relatively good match for all of the references, as the number that don't are relatively few we consider these outliers.
+In R we can run a k-means clustering PCA to evaluate if there is a subset that doesn't match any of the references.
+We take a number of steps to ensure that the PCA makes sense. First, we remove cases where we don't have a relatively good match for all of the references - as the number of cases that don't is relatively small we consider these outliers.
 Then, we normalize each row so that the identity sum is 1.
 Finally, we run the PCA and k-means clustering with a center count of 5 (as we are assuming there are 5 samples mixed together).
 
@@ -80,8 +82,8 @@ ggbiplot(first10k.pca, alpha=0.2, groups=first10k$cluster)
 
 ### Vectorize based analysis
 
-The pacbio sequencing data from the experiment includes reads that are approximately 1300bp on average.
-We can use vg vectorize to explore the relationships between the given reference genomes and the read set.
+The PacBio sequencing data from the experiment includes reads that are approximately 1300bp on average.
+We can use `vg vectorize` to explore the relationships between the given reference genomes and the read set.
 This generates a vector representation of the reads over the graph, where each alignment is represented by a vector in the order of the graph.
 For each node that the alignment touches we record a 1, otherwise a 0.
 (Different encodings are possible, relating to the goodness of alignment of each Mapping in the Alignment's Path to the graph.)

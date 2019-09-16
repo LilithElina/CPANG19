@@ -3,25 +3,25 @@ layout: page
 title: A Virus Pan-Genome
 ---
 
-Today you will work in more self-directed fashion. The driving questions are:
+Today you will work in a more self-directed fashion. The driving questions are:
 
 - Can sequence graphs help us to analyze viral quasispecies data?
 - How can we construct a virus pan-genome?
 - Will the resulting read alignments have fewer artifacts?
 - How can we analyze the diversity in a sample using pan-genomic approaches?
 
-The data were are using for this is based an artifical lab mix of five viruses:
+The data we are using for this is based on an artifical lab mix of five viruses:
 
 - https://github.com/cbg-ethz/5-virus-mix
 - Di Giallonardo, et al., Nucleic Acids Research, Volume 42, Issue 14, pp. e115, 2014. [https://doi.org/10.1093/nar/gku537](https://doi.org/10.1093/nar/gku537)
 
 The five reference sequences underlying the mix can be find in the above git repository, see at https://github.com/cbg-ethz/5-virus-mix/blob/master/data/REF.fasta.
 
-At home, you can rely on sra-tools (more specifically `fastq-dump`) to download data from SRA. At GTPB, Illumina, 454 and PacBio data is already available at your workstations in the folder `~/cpang19/day2/`.
+At home, you can rely on sra-tools (more specifically `fastq-dump`) to download data from SRA. At GTPB, Illumina, 454, and PacBio data is already available at your workstations in the folder `~/cpang19/day2/`.
 
-More concretely, we ask you to work on the following tasks in groups of three or four (in any order, based on your groups preferences):
+More concretely, we ask you to work on the following tasks in groups of three or four (in any order, based on your group's preferences):
 
-- Study the effect of using a pan-genone reference on the read alignments. First, spot some examples of regions of high sequence diversity within the reads.  Construct a pan-genome representation of the five reference genomes, use it to align reads to it, surject them to a linear reference and compare the results to BWA. Second, think of ways to quantify the quality of the alignments across all reads and study the effect of different strategies for pan-genome construction on that measure.
+- Study the effect of using a pan-genone reference on the read alignments. First, spot some examples of regions of high sequence diversity within the reads. Construct a pan-genome representation of the five reference genomes, use it to align reads to, surject them to a linear reference and compare the results to BWA. Second, think of ways to quantify the quality of the alignments across all reads and study the effect of different strategies for pan-genome construction on that measure.
 
 - Analyze the genetic diversity in the five virus mix. Assume you don't know that five viruses went into that sample. Think of ways to visualize the structure of the data sets (Illumina and PacBio). Could you have inferred the number of present viruses from your visualization? Discuss why this is (or is not) possible.
 
@@ -39,7 +39,7 @@ We ask each group to
 There is a number of VG subcommands that can aid your tasks today, in particular:
 
 - vg msga
-- seqwish (+minimap2)
+- seqwish (+ minimap2)
 - vg surject
 - vg vectorize
 - vg mod
@@ -53,10 +53,9 @@ There is a number of VG subcommands that can aid your tasks today, in particular
 - odgi subset
 - odgi bin
 - odgi paths
-- GraphAligner
 
 ### Error correction
-The error correction pipeline has been installed into your computers in the path `~/cpang19/day2/error_correction`. To run it, change the parameters and file paths in config.yaml, and then run the command `snakemake --cores 8 all`. You have to adjust the parmeters for this specific dataset. Use `GenomeSize: 10000`, `ShortreadCoverage: 9000` and `Abundance: 50`
+The error correction pipeline has been installed on your computers in the path `~/cpang19/day2/error_correction`. To run it, change the parameters and file paths in config.yaml, and then run the command `snakemake --cores 8 all`. You have to adjust the parmeters for this specific dataset. Use `GenomeSize: 10000`, `ShortreadCoverage: 9000` and `Abundance: 50`
 
 <br/>
 
@@ -66,19 +65,28 @@ These are things we ran into during the practical, some of which may not have be
 
 #### vg viewing
 
-Rendering the HPV graphs using graphviz can be difficult. One way to reduce the difficulty of rendering (in terms of runtime and memory) is to change the rendering in vg view. Several options can help. First, you can use `vg view -d` alone, not rendering the paths as this can make the renderng much more complex. Secondly, you can add the "simple" mode flag, which removes the node labels, `vg view -dS` or `vg view -dpS`.
+Rendering the HPV graphs using graphviz can be difficult. One way to reduce the difficulty of rendering (in terms of runtime and memory) is to change the rendering in vg view. Several options can help. First, you can use `vg view -d` alone, not rendering the paths as this can make the rendering much more complex. Secondly, you can add the "simple" mode flag, which removes the node labels:
 
-You may find that large PDFs cannot be read by different PDF viewers like evince. As a workaround, the
+	vg view -dS
+	vg view -dpS
+
+You may find that large PDFs cannot be read by different PDF viewers like evince.
 
 #### Surjection
 
-In the case of the HIV graph, you have to specify the path that surject maps into. Otherwise, there is a bug that will cause a crash. In any case, this is a hard problem for surject to solve on its own as there are now many reference paths that overlap and it's not clear which it should work on.
+In the case of the HIV graph, you have to specify the path that `vg surject` maps into. Otherwise, there is a bug that will cause a crash. In any case, this is a hard problem for surject to solve on its own as there are now many reference paths that overlap and it's not clear which it should work on.
 
-To surject a paired-end alignment set, use `vg map -d ref -f mate1.fq.gz -f mate2.fq.gz | vg surject -x ref.xg -p REF_NAME -i -b - >aln.bam`.
+To surject a paired-end alignment set, use:
+
+	vg map -d ref -f mate1.fq.gz -f mate2.fq.gz | vg surject -x ref.xg -p REF_NAME -i -b - >aln.bam
 
 #### Read depth
 
-There are 1.5M Illumina reads in SRR961514. It's not necessary to use all of them in your analysis, as mapping this number of reads is no longer interactive. A simple hack is to take the first N reads using something like `zcat SRR961514_1.fastq.gz | head -$(echo "N*4" | bc) | gzip >firstN_1.fastq.gz` on both of the pair files. The same pattern can be used to take a subset of the pacbio reads.
+There are 1.5M Illumina reads in SRR961514. It's not necessary to use all of them in your analysis, as mapping this number of reads is no longer interactive. A simple hack is to take the first N reads using something like the command below on both of the pair files:
+
+	zcat SRR961514_1.fastq.gz | head -$(echo "N*4" | bc) | gzip > firstN_1.fastq.gz
+
+The same pattern can be used to take a subset of the pacbio reads.
 
 #### Where is the Env gene?
 
@@ -94,7 +102,7 @@ An earlier version of the [ideas.md](./ideas.md) walkthrough suggested that you 
 
 #### GFA output and Bandage
 
-`vg view` produces [GFA format](https://github.com/GFA-spec/GFA-spec) which is a community standard interchange format for sequence graphs. You can open this in `Bandage` which is installed on your systems. Try `vg view g.vg >g.gfa` and then run `Bandage` and open your graph `.gfa` file. You'll need to render it and then you can navigate it. Bandage does not show paths but can easily show large scale structures in the graph.
+`vg view` produces the [GFA format](https://github.com/GFA-spec/GFA-spec), which is a community standard interchange format for sequence graphs. You can open this in [Bandage](https://rrwick.github.io/Bandage/) which is installed on your systems. Try `vg view g.vg >g.gfa` and then run `Bandage` and open your graph `.gfa` file. You'll need to render it and then you can navigate it. Bandage does not show paths but can easily show large scale structures in the graph.
 
 #### Pruning
 

@@ -32,18 +32,18 @@ Now create a directory to work on for this tutorial:
 
 ### Constructing and viewing your first graphs
 
-Like many other toolkits, vg is comes with many different subcommands. First we will use `vg construct` to build our first graph. Run it without parameters to get information on its usage:
+Like many other toolkits, vg comes with many different subcommands. First we will use `vg construct` to build our first graph. Run it without parameters to get information on its usage:
 
 	vg construct
 
-Let's construct a graph from just one sequence in file `tiny/tiny.fa`, which looks like this:
+Let's construct a graph from just the one sequence in file `tiny/tiny.fa`, which looks like this:
 
 	>x
 	CAAATAAGGCTTGGAAATTTTCTGGAGTTCTATTATATTCCAACTCTCTG
 
 To construct a graph, run
 
-	vg construct -r tiny/tiny.fa -m 32 >tiny.ref.vg
+	vg construct -r tiny/tiny.fa -m 32 > tiny.ref.vg
 
 This will create a (very boring) graph that just consists of a linear chain of nodes, each with 32 characters.
 
@@ -63,9 +63,9 @@ Next, we use graphviz to layout the graph representation in DOT format.
 
 View the PDF and compare it to the input sequence. Now vary the parameter passed to `-m` of `vg construct` and visualize the result.
 
-Ok, let's build a new graph that has some variants built into it. First, take a look at at `tiny/tiny.vcf.gz`, which contains variants in (gzipped) [VCF](https://samtools.github.io/hts-specs/VCFv4.2.pdf) format.
+Ok, now let's build a new graph that has some variants built into it. First, take a look at `tiny/tiny.vcf.gz`, which contains variants in (gzipped) [VCF](https://samtools.github.io/hts-specs/VCFv4.2.pdf) format, then run the following command:
 
-	vg construct -r tiny/tiny.fa -v tiny/tiny.vcf.gz -m 32 >tiny.vg
+	vg construct -r tiny/tiny.fa -v tiny/tiny.vcf.gz -m 32 > tiny.vg
 
 Visualize the outcome.  
 
@@ -81,15 +81,15 @@ Another tool that comes with the graphviz package is *Neato*. It creates force-d
 
 	vg view -dpS tiny.vg | neato -Tpdf -o tiny.pdf
 
-For these small graphs, the difference it not that big, but for more involved cases, these layouts can be much easier to read.
+For these small graphs, the difference it not that big, but for more involved cases these layouts can be much easier to read.
 
 It's also possible to read the graph in different formats.
 For instance, we can write the graph in GFA, modify it using text processing tools, and read it back in:
 
-    vg view tiny.vg >tiny.gfa
+    vg view tiny.vg > tiny.gfa
 
-The GFA file has three elements. `S` records represent nodes, `L` records represent edges, and `P` records represent paths.
-We can use grep to remove the path lines:
+The GFA file created by `vg view` has three elements. `S` records represent nodes, `L` records represent edges, and `P` records represent paths.
+We can use grep to remove the path lines, then use `vg view` again to create the DOT output:
 
     cat tiny.gfa | grep -v ^P | vg view -dp - | dot -Tpdf -o tiny.no_path.pdf
 
@@ -100,11 +100,11 @@ Ok, let's step up to a slightly bigger example.
 
 	ln -s ../vg/test/1mb1kgp
 
-This directory contains 1Mbp of 1000 Genomes data for chr20:1000000-2000000. As for the tiny example, let's' build one linear graph that only contains the reference sequence and one graph that additionally encodes the known sequence variation. The reference sequence is contained in `1mb1kgp/z.fa`, and the variation is contained in `1mb1kgp/z.vcf.gz`. Make a reference-only graph named `ref.vg`, and a graph with variation named `z.vg`. Look at the previous examples to figure out the command.
+This directory contains 1Mbp of the 1000 Genomes data for chr20:1000000-2000000. For a tiny example, let's build one linear graph that only contains the reference sequence and one graph that additionally encodes the known sequence variation. The reference sequence is contained in `1mb1kgp/z.fa`, and the variation is contained in `1mb1kgp/z.vcf.gz`. Make a reference-only graph named `ref.vg`, and a graph with variation named `z.vg`. Look at the previous examples to figure out the commands.
 
-You might be tempted to visualize these graphs (and of course you are welcome to try), but they are sufficiently big already that neato can run out of memory and crash.
+You might be tempted to visualize these graphs (and of course you are welcome to try), but they are sufficiently big already that neato can run out of memory and crash, so let's move on to mapping reads instead.
 
-In a nutshell, mapping reads to a graph is done in two stages: first, seed hits are identified and then a sequence-to-graph alignment is performed for each individual read. Seed finding hence allows vg to spot candidate regions in the graph to which a given read can map potentially map to. To this end, we need an index. In fact, vg needs two different representations of a graph for read mapping XG (a succinct representation of the graph) and GCSA (a k-mer based index). To create these representations, we use `vg index` as follows.
+In a nutshell, mapping reads to a graph is done in two stages: first, seed hits are identified and then a sequence-to-graph alignment is performed for each individual read. Seed finding hence allows vg to spot candidate regions in the graph to which a given read can potentially map to. To this end, we need an index. In fact, vg needs two different representations of a graph for read mapping: XG (a succinct representation of the graph) and GCSA (a k-mer based index). To create these representations, we use `vg index` as follows (both commands can also be combined into one):
 
 	vg index -x z.xg z.vg
 	vg index -g z.gcsa -k 16 z.vg
@@ -115,33 +115,33 @@ As mentioned above, the whole graph is unwieldy to visualize. But thanks to the 
 
 	vg find -n 2401 -x z.xg -c 10 | vg view -dp - | dot -Tpdf -o 2401c10.pdf
 
-The option `-c 10` tells `vg find` to include a context of 10 nodes in either direction around node 2401. You are welcome to experiment with different parameter to `vg find` to pull out pieces of the graph you are interested in.  
+The option `-c 10` tells `vg find` to include a context of 10 nodes in either direction around node 2401. You are welcome to experiment with different parameters to `vg find` to pull out pieces of the graph you are interested in.  
 
-Next, we want to play with mapping reads to the graph. Luckily, vg comes with subcommand to simulate reads off off the graph. That's done like this:
+Next, we want to play with mapping reads to the graph. Luckily, vg comes with a subcommand to simulate reads off of the graph. That's done like this:
 
-	vg sim -x z.xg -l 100 -n 1000 -e 0.01 -i 0.005 -a >z.sim
+	vg sim -x z.xg -l 100 -n 1000 -e 0.01 -i 0.005 -a > z.sim
 
-This generates 1000 (`-n`) reads of length (`-l`) with a substitution error rate of 1% (`-e`) and an indel error rate of 0.5% (`-i`). Adding `-a` instructs `vg sim` to output the true alignment paths in GAM format rather than just the plain sequences. Map can work on raw sequences (`-s` for a single sequence or `-r` for a text file with each sequence on a new line), FASTQ (`-f`), or FASTA (`-f` for two-line format and `-F` for a reference sequence where each sequence is over multiple lines).
+This generates 1000 (`-n`) reads of length (`-l`) with a substitution error rate of 1% (`-e`) and an indel error rate of 0.5% (`-i`). Adding `-a` instructs `vg sim` to output the true alignment paths in GAM format rather than just the plain sequences.  
+Map can work on raw sequences (`-s` for a single sequence or `-r` for a text file with each sequence on a new line), FASTQ (`-f`) or FASTA (`-f` for two-line format and `-F` for a reference sequence where each sequence is over multiple lines), and GAM format (`-G` to realign GAM input).
 
 We are now ready to map the simulated read to the graph.
 
 	vg map -x z.xg -g z.gcsa -G z.sim >z.gam
 
-We can visualize alignments using an option to `vg view`. The format is not pretty but it provides us enough information to understand the whole alignment.
-More advanced visualization methods (like [IVG](https://vgteam.github.io/sequenceTubeMap/)) are in development, but do not work on the command line.
+We can visualize alignments using an option to `vg view`. The format is not pretty but it provides us enough information to understand the whole alignment. More advanced visualization methods (like [IVG](https://vgteam.github.io/sequenceTubeMap/)) are in development, but do not work on the command line.
 
 These commands would show us the first alignment in the set:
 
-    vg view -a z.gam | head -1 | vg view -JaG - >first_aln.gam
+    vg view -a z.gam | head -1 | vg view -JaG - > first_aln.gam
     vg find -x z.xg -G first_aln.gam | vg view -dA first_aln.gam - | dot -Tpdf -o first_aln.pdf
 
-We see the `Mappings` of the `Alignment` written in blue for exact matches and yellow for mismatches above the nodes that they refer to. Many alignments can be visualized at the same time. A simpler mode of visualization `vg view -dSA` gives us the alignment's mappings to nodes, colored in the range from green to red depending on the quality of the match to the particular node.
+We see the `Mappings` of the `Alignment` written in blue for exact matches and yellow for mismatches above the nodes that they refer to. Many alignments can be visualized at the same time. A simpler mode of visualization, `vg view -dSA` gives us the alignment's mappings to nodes, colored in the range from green to red depending on the quality of the match to the particular node.
 
-For evaluation purposes, vg has the capability to compare the newly created read alignments to true paths of each reads used during simulation.
+For evaluation purposes, vg has the capability to compare the newly created read alignments to true paths of each read used during simulation.
 
 	vg map -x z.xg -g z.gcsa -G z.sim --compare -j
 
-This outputs the comparison between mapped and and true locations in JSON format. We can use this quickly check if our alignment process is doing what we expect on the variation graph we're working on. For instance, we could set alignment parameters that cause problems for our alignment and then observe this using the `--compare` feature of the mapper. For example, we can map two ways and see a difference in how correct our alignment is:
+This outputs the comparison between mapped and true locations in JSON format. We can use this to quickly check if our alignment process is doing what we expect on the variation graph we're working on. For instance, we could set alignment parameters that cause problems for our alignment and then observe this using the `--compare` feature of the mapper. For example, we can map two ways (with and without minimum match length) and see a difference in how correct our alignment is:
 
 	vg map -x z.xg -g z.gcsa -G z.sim --compare -j | jq .correct | sed s/null/0/ | awk '{i+=$1; n+=1} END {print i/n}'
 
@@ -155,7 +155,7 @@ It is essential to understand that our alignment process works against the graph
 
 ### Exploring the benefits of graphs for read mapping
 
-To get a first impression of how a graph reference helps us do a better job while mapping reads. We will construct a series of graphs from a linear reference to a graph with a lot variation and look at mapping rates, i.e. at the fraction of reads that can successfully be mapped to the graph. For examples, we might include variation above given allele frequency (AF) cutoffs and vary this cutoff. You can make a VCF with a minimum allele fequency with this command (replace `FREQ` with the frequency you want):
+To get a first impression of how a graph reference helps us do a better job while mapping reads, we will construct a series of graphs from a linear reference to a graph with a lot variation and look at mapping rates, i.e. at the fraction of reads that can successfully be mapped to the graph. For example, we might include variation above given allele frequency (AF) cutoffs and vary this cutoff. You can make a VCF with a minimum allele fequency with this command (replace `FREQ` with the frequency you want):
 
     vcffilter -f 'AF > FREQ' 1mb1kgp/z.vcf.gz > min_af_filtered.vcf
 
@@ -163,7 +163,7 @@ Alternatively, you can also use `bcftools` to subset the VCFs. The ``--exculde``
 
 With this input you should be able to run the whole pipeline:
 
-- Construct the graphs with the filtered VCF
+- Construct the graphs with the filtered VCFs
 - Index the graphs for mapping
 - Map the simulated reads to the graphs
 - Check the identity of the read mappings
@@ -177,14 +177,14 @@ How do these files seem to scale with the minimum cutoff?
 
 <br/>
 
-### Mapping data from real data to examine the improvement
+### Mapping using real data to examine the improvement
 
 We can also download some real data mapping to this region to see if the different graphs provide varying levels of performance.
 
     samtools view -b ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/NA12878/NIST_NA12878_HG001_HiSeq_300x/RMNISTHS_30xdownsample.bam 20:1000000-2000000 >NA12878.20_1M-2M.30x.bam
     wget http://hypervolu.me/~erik/tmp/HG002-NA24385-20_1M-2M-50x.bam
 
-The first is a sample that was used in the preparation of the 1000 Genomes results, and so we expect to find it in the graph. The second wasn't used in the preparation of the variant set, but we do expect to find almost all of its variants in the 1000G set. Why is this true?
+The first is a sample that was used in the preparation of the 1000 Genomes results, so we expect to find it in the graph. The second wasn't used in the preparation of the variant set, but we do expect to find almost all of its variants in the 1000G set. Why is this true?
 
 We can run a single-ended alignment test to compare with bwa mem:
 
@@ -194,7 +194,7 @@ We can run a single-ended alignment test to compare with bwa mem:
 
 Then we can compare the results using sort and join:
 
-    join <(sort bwa_mem.scores.tsv ) <(sort vg_map.AF0.01.scores.tsv ) | awk '{ print $0, $3-$2 }' | tr ' ' '\t' | sort -n -k 4 | pv -l | gzip >compared.tsv.gz
+    join < (sort bwa_mem.scores.tsv ) < (sort vg_map.AF0.01.scores.tsv ) | awk '{ print $0, $3-$2 }' | tr ' ' '\t' | sort -n -k 4 | pv -l | gzip > compared.tsv.gz
 
 We can then see how many alignments have improved or worse scores:
 
@@ -206,8 +206,8 @@ In general, the scores improve. Try plotting a histogram of the differences to s
 
 We can pick a subset of reads with high or low score differentiation to realign and compare:
 
-    zcat HG002-NA24385-20_1M-2M-50x_1.fq.gz | awk '{ printf("%s",$0); n++; if(n%4==0) { printf("\n");} else { printf("\t\t");} }' | grep -Ff <(zcat compared.tsv.gz | awk '{ if ($4 < -10) print $1 }' ) | sed 's/\t\t/\n/g' | gzip >worse.fq.gz
-    zcat HG002-NA24385-20_1M-2M-50x_1.fq.gz | awk '{ printf("%s",$0); n++; if(n%4==0) { printf("\n");} else { printf("\t\t");} }' | grep -Ff <(zcat compared.tsv.gz | awk '{ if ($4 > 10) print $1 }' ) | sed 's/\t\t/\n/g' | gzip >better.fq.gz
+    zcat HG002-NA24385-20_1M-2M-50x_1.fq.gz | awk '{ printf("%s",$0); n++; if(n%4==0) { printf("\n");} else { printf("\t\t");} }' | grep -Ff < (zcat compared.tsv.gz | awk '{ if ($4 < -10) print $1 }' ) | sed 's/\t\t/\n/g' | gzip > worse.fq.gz
+    zcat HG002-NA24385-20_1M-2M-50x_1.fq.gz | awk '{ printf("%s",$0); n++; if(n%4==0) { printf("\n");} else { printf("\t\t");} }' | grep -Ff < (zcat compared.tsv.gz | awk '{ if ($4 > 10) print $1 }' ) | sed 's/\t\t/\n/g' | gzip > better.fq.gz
 
 Let's dig into some of the more-highly differentiated reads to understand why vg is providing a better (or worse) alignment. How might you go about this? There are many ways you could do this, but you may find some of these commands useful:
 
@@ -222,7 +222,7 @@ Let's dig into some of the more-highly differentiated reads to understand why vg
 
 Use minimap2 and seqwish to build graphs from the HLA gene haplotypes in vg/test/GRCh38_alts/FASTA/HLA.
 
-    minimap2 -c -x asm20 -X -t 4 DRB1-3123.fa DRB1-3123.fa | gzip >DRB1-3123.paf.gz
+    minimap2 -c -x asm20 -X -t 4 DRB1-3123.fa DRB1-3123.fa | gzip > DRB1-3123.paf.gz
     seqwish -s DRB1-3123.fa -p DRB1-3123.paf.gz -b DRB1-3123.work -g DRB1-3123.gfa
     odgi build -g DRB1-3123.gfa -o - | odgi sort -i - -o DRB1-3123.og
     odgi viz -i DRB1-3123.og -o DRB1-3123.png -x 2000 -R
@@ -230,7 +230,7 @@ Use minimap2 and seqwish to build graphs from the HLA gene haplotypes in vg/test
 Follow the steps in https://github.com/ekg/yeast-pangenome/blob/master/steps.sh to build and visualize a pangenome from yeast.
 (Note that we filter the length of our alignments using fpa. This can also be applied to the GRCh32 HLA alts.)
 
-Can we index this graph and map reads against it? (e.g. from YPRP https://yjx1217.github.io/Yeast_PacBio_2016/welcome/ )?
+Can we index this graph and map reads against it (e.g. from [YPRP]( https://yjx1217.github.io/Yeast_PacBio_2016/welcome/) ?
 
 Use Bandage and odgi to visualize graphs (convert to GFA first).
 

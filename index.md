@@ -16,7 +16,7 @@ This course is oriented towards biologists and bioinformaticians with at least a
 ---
 
 ## Course Documentation 
-All the datasets used for this training course is available throughout the documentation.
+All the datasets used for this training course are available in the documentation.
 
 <br/>
 
