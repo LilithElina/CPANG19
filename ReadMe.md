@@ -1,9 +1,9 @@
 ## CPANG19 - Computational PANGenomics
 
 ###  Instituto Gulbenkian de Ciência (IGC) - Oeiras, Portugal - September 9<sup>th</sup> - September 13<sup>th</sup> 2019
-Go to the [course official website](http://gtpb.igc.gulbenkian.pt/bicourses/2019/CPANG19/)
+Go to the [official course website](http://gtpb.igc.gulbenkian.pt/bicourses/2019/CPANG19/)
 
-**This repo contains notes and edits by [@LilithElina](https://github.com/LilithElina) after participating in the course.**
+**This repo contains notes, edits, and results added by [@LilithElina](https://github.com/LilithElina) after participating in the course.**
 
 ---
 

@@ -70,7 +70,7 @@ Rendering the HPV graphs using graphviz can be difficult. One way to reduce the 
 	vg view -dS
 	vg view -dpS
 
-You may find that large PDFs cannot be read by different PDF viewers like evince.
+You may find that large PDFs cannot be read by PDF viewers like evince. Instead of creating a DOT output, use `vg viz` to create an SVG file that you can open with [inkscape](https://inkscape.org/) or [GIMP](https://www.gimp.org/).
 
 #### Surjection
 
