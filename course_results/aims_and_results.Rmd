@@ -1,0 +1,172 @@
+---
+title: "Team_6_HIV"
+author: "Team_6"
+date: "9/10/2019"
+output: 
+  html_document: 
+    fig_caption: yes
+    toc: yes
+    toc_depth: 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Data 
+
+- raw data of mix from 5 strains
+  - Illumina 
+  - PacBio 
+  - 454
+
+- reference genomes 
+  - 5 HIV strains in one fasta
+  - HIV-1, probably downloaded from NCBI?
+  
+
+## AIM1 - Comparison of different variant graph construction methods 
+
+### De novo assembly of PacBio data with CANU 
+
+command
+```{r, engine = 'bash', eval = FALSE}
+/canu-1.8/Linux-amd64/bin/canu -pacbio-raw ../SRR961669.fastq.gz  -p hiv -d hiv_denovo genomeSize=10k readSamplingCoverage=40
+```
+
+![visualization of hvi_denovo.gfa with Bandage](/home/participant/Pictures/6genome_bandage_canu.png)
+
+#### Load de novo contigs into variant graph and visualize with vg viz
+
+command
+```{r, engine = 'bash', eval = FALSE}
+vg msga -f hiv_denovo/hiv.contigs.fasta > hiv_denovo.vg
+vg index -x hiv_denovo.xg hiv_denovo.vg -g hiv_denovo.gcsa -k 16
+vg viz -x hiv_denovo.xg -o hiv_denovo.svg
+```
+
+![visualization of hiv_denovo.gfa with Bandage](/home/participant/Pictures/6genome_bandage_canu_vg.png)
+
+![variant graph vizualised with vg viz and inkscape](/home/participant/Pictures/vg_viz_canu.png)
+
+### Construct genome graph with vg msga based on HIV-1
+
+visualize with bandage and odgi
+
+command
+```{r, engine = 'bash', eval = FALSE}
+vg construct -r ../HIV-1.fasta > hiv.vg
+vg index -x hiv.xg hiv.vg -g hiv.gcsa
+vg msga -f ../REF.fasta -g hiv.vg > hiv_6genomes.vg
+vg view -dpS hiv_6genomes.vg | dot -Tpdf -o hiv_6genomes.pdf
+```
+![variant graph in Bandage](/home/participant/Pictures/6genome_bandage.png)
+
+![variant graph zoom in Bandage](/home/participant/Pictures/6genome_bandage_zoom.png)
+
+![variant graph visualized with vg viz and inkscape](/home/participant/Pictures/vg_viz_6genomes.png)
+
+
+### Construct genome graph with minimap2 -> seqwish -> odgi
+
+command
+```{r, engine = 'bash', eval = FALSE}
+# run the pair-wise alignment between all reference genome 
+minimap2 -t2 -c -x asm20 896.fa HXB2.fa JRCSF.fa NL43.fa YU2.fa > 896_o4.paf &
+minimap2 -t2 -c -x asm20 HXB2.fa JRCSF.fa NL43.fa YU2.fa > HXB2_o3.paf &
+minimap2 -t2 -c -x asm20 JRCSF.fa NL43.fa YU2.fa > JRCSF_o2.paf &
+minimap2 -t2 -c -x asm20 NL43.fa YU2.fa > NL43_YU2.paf &
+cat *.paf > ref.paf
+#short cut: minimap2 -X -c -x asm20 REF.fasta REF.fasta > all_vs_all.paf
+
+seqwish -s REF.fasta -p ref.paf -b hiv.work -g hiv.gfa
+odgi build -g hiv.gfa -o - | odgi sort -i - -o hiv.og
+odgi viz -i hiv.og -o hiv.png -x 2000 -R
+```
+
+
+![variant graph in Bandage](/home/participant/Pictures/group6/graph_before_augment.png)
+
+### Construct genome graph with vg msga from six references
+
+command
+```{r, engine = 'bash', eval = FALSE}
+# another way to constuct the graph right from fasta file but a bit slow
+vg msga -f 6ref.fasta > 6ref.vg
+# prune the graph filtering the complexity nodes which will largely reduce the computation of index 
+vg prune 6ref.vg > 6ref_prune.vg
+# index the original graph with xg and index the pruned graph with gcsa for efficiency
+vg index -x 6ref.xg 6ref.vg
+vg index -g 6ref.gcsa 6ref_prune.vg
+```
+
+#### Mapping of long reads to the genome graph and augmenting the graph with them
+
+command
+```{r, engine = 'bash', eval = FALSE}
+vg map -x 6ref.xg -g 6ref.gcsa -f SRR961669.fastq.gz > paco.gam
+
+#######augement the alignment to the graph and visualize the updated graph
+vg augment -i 6ref.vg paco.gam > paco.aug.vg 
+vg view paco.aug.vg > paco.gfa
+odgi build -g paco.gfa -o - | odgi sort -i - -o paco.og
+odgi stats -i paco.og -S
+odgi viz -i paco.og -A SRR -R -S -x 5000 -P 1 -X 3 -o paco.png
+```
+
+![variant graph in Bandage after augmentation](/home/participant/Pictures/group6/graph_augmented.png)
+
+![variant graph augmented with PacBio reads visualized with odgi](/home/participant/Pictures/group6/pic0.png)
+
+![variant graph augmented with PacBio reads visualized with odgi, zoom](/home/participant/Pictures/group6/pic1.png)
+
+![variant graph augmented with PacBio reads visualized with odgi, zoom](/home/participant/Pictures/group6/pic2.png)
+
+#### Conclusion AIM1
+
+- seqwish creates circular graph from linear viral genome
+- augmenting reference genome graph with all long reads is tricky
+- just assmebling long reads isn enough to create a useful graph
+- there are some structural variations between the six references
+
+
+## AIM2 - Where is variation in viral genes?    
+
+### Augment variant graph with annotation of HIV-1
+
+command
+```{r, engine='bash', eval=FALSE}
+vg annotate -x hiv_6genomes.xg -f ../annotation/sequence.gff3 > hiv_annot.gam
+vg augment hiv_6genomes.vg -i hiv_annot.gam > hiv_6genomesA.vg
+vg index -x hiv_6genomesA.xg hiv_6genomesA.vg 
+vg viz -x hiv_6genomesA.xg -o hiv_6genomesA.svg
+```
+
+![variant graph augmented with annotation visualized with vg viz](/home/participant/Pictures/6genomes_annot.png)
+
+
+```{r}
+t <- read.table(file = "/home/participant/cpang19/day2/exsercise/node_lenghtpergene.tsv")
+t$Lnormalized <- t$V4/ t$V2
+library(ggplot2)
+ggplot(t, aes(V1,Lnormalized))+
+  geom_point()+ylab("number of nodes / gene length")+
+  xlab("viral structural proteins")
+
+
+```
+
+
+#### Conclusion AIM2
+
+- viral genes overlap in the genome
+- env, nef and vpu are genes with higher number of nodes per base
+
+
+
+
+
+
+
+

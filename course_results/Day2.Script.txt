@@ -1,0 +1,66 @@
+### not working
+vg view REF.vg > REF.gfa
+vg construct -r REF.fasta -m 32 > REF.vg
+vg index -x REF.xg -g REF.gcsa -k 16 REF.vg
+vg find -n 1000 -c 10 -x REF.xg | vg view -dp - | dot -Tpdf -o REF1000.pdf
+
+### building pangenome from REF
+vg msga -f REF.fasta > REF.vg 
+vg index -x REF.xg -k 16 REF.vg
+vg find -n 1000 -c 10 -x REF.xg | vg view -dp - | dot -Tpdf -o REF1000.pdf
+vg find -n 100 -c 10 -x REF.xg | vg view -dp - | dot -Tpdf -o REF100.pdf
+vg view REF.vg > REF.gfa
+
+### mapping reads to ref linearly
+bwa mem REF.fasta SRR961514_1.fastq.gz SRR961514_2.fastq.gz | sambamba view -S - > illumina_to_ref.bam
+
+### build graph starting from HIV1
+
+cat HIV-1.fasta REF.fasta > HIV_REF.fasta
+vg msga -f HIV_REF.fasta > HIV_REF.vg
+vg index -x HIV_REF.xg -k 16 HIV_REF.vg
+vg view HIV_REF.vg > HIV_REF.gfa
+
+### for indexing gcsa, need to prune the graph
+### parameters 16 3 0 are recommended by erik Garrison
+vg prune -k 16 -e 3 -s 0 REF.vg > pruned_REF.vg
+vg index -g REF.gcsa -k 16 pruned_REF.vg
+
+### minimap test
+minimap2 -c -x asm20 -X -t 4 REF.fasta REF.fasta | gzip > REF.paf.gz
+seqwish -s REF.fasta -p REF.paf.gz -b REF.work -g REF.work.gfa
+odgi build -g REF.work.gfa -o - | odgi sort -i - -o REF.work.og
+odgi viz -i REF.work.og -o REF.work.png -x 2000 -R
+
+### subsetting the graph to map to a difficult region
+vg find -n 2830 -c 20 -x REF.xg > REF.2830c20.vg
+vg view -dp REF.2830c20.vg | dot -Tpdf -o REF.2830c20.pdf
+vg prune -k 16 -e 3 -s 0 REF.2830c20.vg > REF.2830c20.pruned.vg
+vg index -g REF.2830c20.gcsa -k 16 REF.2830c20.pruned.vg
+zcat SRR961514_1.fastq.gz | head -$(echo "1000*4" | bc) | gzip > first1k_1.fastq.gz
+zcat SRR961514_2.fastq.gz | head -$(echo "1000*4" | bc) | gzip > first1k_2.fastq.gz
+vg map -d REF.2830c20 -f first1k_1.fastq.gz -f first1k_2.fastq.gz > REF.2830c20.illumina.gam
+vg augment -i REF.2830c20.vg REF.2830c20.illumina.gam | vg view -dp - | dot -Tpdf -o REF.2830c20.paths.pdf
+vg augment -i REF.2830c20.vg REF.2830c20.illumina.gam | vg sort - > REF.2830c20.sort.vg
+vg viz -x REF.2830c20.sort.xg -o REF.2830c20.sort.svg
+vg view -a -j REF.2830c20.illumina.gam > REF.2830c20.illumina.json
+jq "select (.identity > .75)" REF.2830c20.illumina.json > REF.2830c20.illumina.75pc.json
+vg view -JaG REF.2830c20.illumina.75pc.json > REF.2830c20.illumina.75pc.gam
+vg augment -i REF.2830c20.vg REF.2830c20.illumina.75pc.gam | vg sort - > REF.2830c20.sort.75.vg
+vg index -x REF.2830c20.sort.75.xg REF.2830c20.sort.75.vg 
+vg viz -x REF.2830c20.sort.75.xg -o REF.2830c20.sort.75.svg
+inkscape REF.2830c20.sort.75.svg
+
+### calculating MAPQ for graph alignment and linear genome mapping
+bwa mem REF.fasta first100k_1.fastq.gz first100k_2.fastq.gz > first100k.illumina_to_ref.sam
+vg map -d REF -f first100k_1.fastq.gz -f first100k_2.fastq.gz > REF.first100k.illumina.gam
+vg map -d REF -f first100k_1.fastq.gz -f first100k_2.fastq.gz --surject-to bam > REF.first100k.illumina.bam
+
+# samtools view REF.first100k.illumina.bam | awk 'BEGIN {FS="\t"} {qual += $5} END {print qual / NR}'
+# 56.977
+# samtools view first100k.illumina_to_ref.bam | awk 'BEGIN {FS="\t"} {qual += $5} END {print qual / NR}'
+# 48.2904
+
+for win in $allWin; do   echo "window: " $start-$win;   linMapQ=$(samtools view first100k.illumina_to_ref.srt.bam 896:$start-$win | awk 'BEGIN {FS="\t"} {qual += $5} END {print qual / NR}');   graMapQ=$(s
+amtools view REF.first100k.illumina.srt.bam 896:$start-$win | awk 'BEGIN {FS="\t"} {qual += $5} END {print qual / NR}');   echo "$graMapQ - $linMapQ" | bc;   start=$win; done
+

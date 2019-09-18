@@ -1,0 +1,136 @@
+
+### retrive gene sequences from different E. coli strains
+for i in ncbi-genes/*fa
+do
+  grep -A1 "gyrA" $i >> gyrA.fasta
+done
+
+### build graph using multiple sequence alignment
+vg msga -f gyrA.fasta > gyrA.vg
+### visualize the graph
+vg index -x gyrA.xg gyrA.vg
+vg viz -x gyrA.xg -o gyrA.svg
+
+### build graph with minimap2 and seqwish
+minimap2 -c -x asm20 -X -t 4 gyrA.fasta gyrA.fasta | gzip >gyrA.paf.gz
+seqwish -s gyrA.fasta -p gyrA.paf.gz -b gyrA.work -g gyrA.gfa
+
+### whole-genome graph using 10 E. coli strains
+for i in $(ls ncbi-whole-genomes/*fna | head -10)
+do
+  cat $i >> 10Ecoli.fasta
+done
+minimap2 -c -x asm20 -X -t 4 10Ecoli.fasta 10Ecoli.fasta | gzip >10Ecoli.paf.gz
+seqwish -s 10Ecoli.fasta -p 10Ecoli.paf.gz -b 10Ecoli.work -g 10Ecoli.gfa
+
+### convert 10Ecoli.gfa to vg format and map gyrA fasta sequence
+vg view -Fv 10Ecoli.gfa | vg mod -X 32 - | vg mod -M 8 - | vg sort - >10Ecoli.vg
+vg index -x 10Ecoli.xg 10Ecoli.vg
+
+### check if a fasta sequence is present in a graph
+GraphAligner -g 10Ecoli.vg -f NZ_CP015853.1_gyrA.fasta -a NZ_CP015853.1_gyrA.vs.10Ecoli.gam
+vg view -a -j NZ_CP015853.1_gyrA.vs.10Ecoli.gam > NZ_CP015853.1_gyrA.vs.10Ecoli.json
+# we get "identity":1 -> gene present!
+### another (random sequence)
+GraphAligner -g 10Ecoli.vg -f randomGene.fasta -a randomGene.vs.10Ecoli.gam
+vg view -a -j randomGene.vs.10Ecoli.gam > randomGene.vs.10Ecoli.json
+# empty gam file -> gene not present!
+
+### checking if a strain has a gene using short reads
+zcat SRR3050857_1.fastq.gz | head -$(echo "25000*4" | bc) | gzip > first25kSRR3050857_1.fastq.gz
+vg map -d 10Ecoli -f reads/first25kSRR3050857_1.fastq.gz > first25kSRR3050857_1.vs.10Ecoli.gam
+
+vg pack -x 10Ecoli.xg -g NZ_CP015853.1_gyrA.vs.10Ecoli.gam -d > coverage.NZ_CP015853.1_gyrA.vs.10Ecoli.txt
+vg pack -x 10Ecoli.xg -g first25kSRR3050857_1.vs.10Ecoli.gam -d > coverage.first25kSRR3050857_1.vs.10Ecoli.txt
+paste coverage.NZ_CP015853.1_gyrA.vs.10Ecoli.txt coverage.first25kSRR3050857_1.vs.10Ecoli.txt > merge.coverage.txt
+
+awk 'BEGIN {FS="\t"} {if ($4 != 0) print $0}' merge.coverage.txt > gene.coverage.txt
+
+
+### check if all genes of a genome sequence are present in a graph
+GraphAligner -g 10Ecoli.vg -f ncbi-genes/GCF_000988355.1_ASM98835v1_genomic.fa -a ASM98835v1.genes.vs.10Ecoli.gam
+
+Alignment finished
+Input reads: 4589 (4097711bp)
+Seeds found: 71329
+Seeds extended: 4567
+Reads with a seed: 4486 (4073876bp)
+Reads with an alignment: 4486
+Alignments: 4533 (4064512bp)
+End-to-end alignments: 4429 (3978015bp)
+
+(cpang19) participant@t8:~/cpang19/day3/bacteria$ grep ">" ncbi-genes/GCF_000988355.1_ASM98835v1_genomic.fa | wc -l
+4589
+
+### check for core genes in graph using odgi
+gff2bed < ncbi-gff/GCF_000005845.2_ASM584v2_genomic.gff > ncbi-gff/GCF_000005845.2_ASM584v2_genomic.bed
+odgi build -g 10Ecoli.gfa -o - | odgi sort -i - -o 10Ecoli.work.og
+odgi stats -i 10Ecoli.work.og -B ncbi-gff/GCF_000005845.2_ASM584v2_genomic.bed > odgi_res.txt
+
+
+
+############## R ####################
+
+library(tidyverse)
+
+data1 = read.table("cpang19/day3/bacteria/coverage.NZ_CP015853.1_gyrA.vs.10Ecoli.txt",header=T)
+data2 <- read.table("cpang19/day3/bacteria/coverage.first25kSRR3050857_1.vs.10Ecoli.txt",header=T)
+plot(data1$coverage, data1$seq.pos)
+
+data3 <- read.table("cpang19/day3/bacteria/gene.coverage.txt", header = TRUE)
+
+plot(data3$seq.pos, data3$coverage)
+plot(data3$seq.pos.1, data3$coverage.1)
+
+summary(data2)
+
+summary(data2[data2$coverage>0,])
+
+########################
+
+odgi_stats = read.table(file = "cpang19/day3/bacteria/odgi_res.txt",header = T, stringsAsFactors = F)
+
+hist(odgi_stats$uniq.size)
+plot(odgi_stats$uniq.size/10,odgi_stats$frac)
+
+odgi_stats_filt = odgi_stats[order(odgi_stats$frac,decreasing = T),]
+odgi_stats_filt = odgi_stats_filt[order(odgi_stats_filt$bed.name,decreasing = T),]
+
+odgi_stats_filt = odgi_stats_filt[!duplicated(odgi_stats_filt$bed.name),]
+odgi_stats_filt = odgi_stats_filt[-which(odgi_stats_filt$bed.name=="."),]
+plot(odgi_stats_filt$uniq.size/10,odgi_stats_filt$frac)
+
+length(which(odgi_stats_filt$frac >  0.9))
+nb_core = c()
+thr = seq(0,1,0.01)
+for (i in thr) {
+  nb_core = c(nb_core,length(which(odgi_stats_filt$frac >  i & odgi_stats_filt$uniq.size >= 10)))
+}
+plot(thr,nb_core)
+
+############## R ####################
+
+
+
+
+
+
+### augment the graph with the gyrA mapping, it works but it is not so meaningful...
+vg prune -k 16 -e 3 10Ecoli.vg > 10Ecoli.prune.vg
+vg index -g 10Ecoli.gcsa -k 16 10Ecoli.prune.vg
+vg map -F gyrA.fasta -x 10Ecoli.xg -g 10Ecoli.gcsa > aln.gyrA.gam
+vg augment -i 10Ecoli.vg aln.gyrA.gam > 10Ecoli.gyrA.vg
+
+
+
+
+
+##################################################################
+
+vg view 10Ecoli.gyrA.prune.vg > 10Ecoli.gyrA.gfa
+
+xg -g 10Ecoli.gyrA.gfa - 10Ecoli.gyrA.gfa.xg
+xg -i 10Ecoli.gyrA.gfa.xg -G > 10Ecoli.gyrA.paths.gfa
+
+
+

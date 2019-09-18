@@ -1,0 +1,21 @@
+# index alignment file
+vg index -N -d MHC.fix.aug.F_gen.512.gam.idx MHC.fix.aug.F_gen.512.gam 
+
+# find subgraph region in indexed alignment to extract reads that map there
+vg view -A  <(vg find -d MHC.fix.aug.F_gen.512.gam.idx -A MHC.fix.aug.F_gen.path.sub.vg) <(vg find -x MHC.fix.aug.F_gen.path.xg -G <(vg find -d MHC.fix.aug.F_gen.512.gam.idx -A MHC.fix.aug.F_gen.path.sub.vg)) > MHC.fix.aug.F_gen.path.sub.512.vg
+
+vg find -d MHC.fix.aug.F_gen.513.gam.idx -A MHC.fix.aug.F_gen.path.sub.vg > MHC.fix.aug.F_gen.path.sub.513.gam
+
+# add the paths of the reads into the subgraph without augmenting
+vg view -a MHC.fix.aug.F_gen.path.sub.gam | jq 'select(.path != null) | "P\t" + .name + "\t" + ([.path.mapping[].position | ((.node_id | tostring) + (if .is_reverse != null then "-" else "+" end))] | join(",")) + "\t*"' | tr -d '"' | sed 's/\\t/\t/g' | grep -v null >> MHC.fix.aug.F_gen.path.sub.512.vg
+
+mv MHC.fix.aug.F_gen.path.sub.512.vg MHC.fix.aug.F_gen.path.sub.512.gfa
+
+# visualise with odgi
+odgi build -g MHC.fix.aug.F_gen.path.sub.512.gfa -o - | odgi sort -i - -o MHC.fix.aug.F_gen.path.sub.512.og
+
+# get length of graph
+odgi stats -S -i MHC.fix.aug.F_gen.path.sub.512.og
+
+# create PNG output with single nucleotide resolution
+odgi viz -i MHC.fix.aug.F_gen.path.sub.512.og -o MHC.fix.aug.F_gen.path.sub.512.png -x 22822 -R
