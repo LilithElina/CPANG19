@@ -175,7 +175,7 @@ The DOT output generated with the `-d` option can be redirected to [graphviz](ht
 vg view -d tiny.ref.vg | dot -Tpdf -o tiny.ref.pdf
 ```
 
-![*DOT version of tiny reference graph*](day1/construct_tiny/tiny.ref.pdf)
+![*DOT version of tiny reference graph*](day1/tiny.ref.pdf)
 
 This linear graph is pretty boring ad no better than a regular reference sequence. Luckily, we have a VCF (variant call format) file with variants that can be included in the graph. That is also done using `vg construct`, adding the `-v` option to mark the VCF input file:
 
@@ -187,7 +187,7 @@ vg construct -r tiny/tiny.fa -v tiny/tiny.vcf.gz -m 32 > tiny.vg
 vg view -d tiny.vg | dot -Tpdf -o tiny.pdf
 ```
 
-![*DOT version of tiny graph*](day1/construct_tiny/tiny.pdf)
+![*DOT version of tiny graph*](day1/tiny.pdf)
 
 It is also possible to show the original reference path in the DOT output by adding the `-p` option to the `vg view` call:
 
@@ -195,7 +195,7 @@ It is also possible to show the original reference path in the DOT output by add
 vg view -dp tiny.vg | dot -Tpdf -o tiny_path.pdf
 ```
 
-![*DOT version of tiny graph with path*](day1/construct_tiny/tiny_path.pdf)
+![*DOT version of tiny graph with path*](day1/tiny_path.pdf)
 
 
 This adds a path (usually with funny symbols) to the graph and at every edge notes the node that the path takes in order to be the reference sequence.
@@ -206,7 +206,7 @@ The `-S` argument (`--simple-dot`) simplifies the DOT output by removing node la
 vg view -dpS tiny.vg | dot -Tpdf -o tiny_simple.pdf
 ```
 
-![*simplifed DOT version of tiny graph with path*](day1/construct_tiny/tiny_simple.pdf)
+![*simplifed DOT version of tiny graph with path*](day1/tiny_simple.pdf)
 
 For a different visual layout of the graph, use Neato, which is part of the graphviz package:
 
@@ -214,7 +214,7 @@ For a different visual layout of the graph, use Neato, which is part of the grap
 vg view -dpS tiny.vg | neato -Tpdf -o tiny_neato.pdf
 ```
 
-![*simplifed DOT version of tiny graph with path in Neato*](day1/construct_tiny/tiny_neato.pdf)
+![*simplifed DOT version of tiny graph with path in Neato*](day1/tiny_neato.pdf)
 
 Note that Neato works best with the simplified version of the graph, as it doesn't display longer sequences well.
 
@@ -239,7 +239,7 @@ Stack trace path: /tmp/vg_crash_ZtE85h/stacktrace.txt
 cat tiny.gfa | grep -v ^P | vg view -dF - | dot -Tpdf -o tiny.no_path.pdf
 ```
 
-![*simplifed DOT version of tiny graph with no path*](day1/construct_tiny/tiny.no_path.pdf)
+![*simplifed DOT version of tiny graph with no path*](day1/tiny.no_path.pdf)
 
 As output, this doesn't have any advantage over just not adding the path in the `vg view` call with `-p`, but in other settings it might be helpful to be able to edit the graph itself, e.g. for looking for specific regions.
 
@@ -280,7 +280,7 @@ vg view z.vg > z.gfa
 
 The graph consist of 102,996 nodes, and - in the zoomed out view in Bandage - still looks pretty linear. There are most likely no major structural variants included, but a lot of single nucleotide polymorphisms (SNPs) and insertions or deletions (indels).
 
-![*z.gfa detail*](day1/sim_reads/z.PNG)
+![*z.gfa detail*](day1/z.PNG)
 
 ### Graph indexing
 
@@ -302,7 +302,7 @@ vg find -n 2401 -x z.xg -c 10 | vg view -dp - | dot -Tpdf -o 2401c10.pdf
 
 The `-c` option is for "context"", so how many nodes should be included around the one of interest:
 
-![*subgraph of z.vg*](day1/sim_reads/2401c10.pdf)
+![*subgraph of z.vg*](day1/2401c10.pdf)
 
 ### Read simulation and mapping
 
@@ -327,7 +327,7 @@ vg view -a z.gam | head -1 | vg view -JaG - > first_aln.gam
 vg find -x z.xg -G first_aln.gam | vg view -dA first_aln.gam - | dot -Tpdf -o first_aln.pdf
 ```
 
-![*DOT version of subgraph with first alignment*](day1/sim_reads/first_aln.pdf)
+![*DOT version of subgraph with first alignment*](day1/first_aln.pdf)
 
 The output shows blue and yellow annotations above the subgraph, denoting the mapping of the read. Blue means it's an exact match, yellow marks a mismatch. The graph shows the mapping quality (60) and identity (0.99) of the read compared to the graph, as well as the read name (above the numbers), and the score (97) at the first mapped position to the right of the subgraph. It then shows the mappings to a path, including the position with node ID and forward/reverse information, as well as a "from" and a "to" length which I cannot explain. I think the rank basically gives the order in which the fragments map - reading from right to left in this case.
 
@@ -338,7 +338,7 @@ vg view -a z.gam | head -3 | vg view -JaG - > first3_aln.gam
 vg find -x z.xg -G first3_aln.gam | vg view -dA first3_aln.gam - | dot -Tpdf -o first3_aln.pdf
 ```
 
-![*DOT version of subgraphs with first three alignments*](day1/sim_reads/first3_aln.pdf)
+![*DOT version of subgraphs with first three alignments*](day1/first3_aln.pdf)
 
 Cool! As I hoped, I now have three subgraphs in my PDF file.  
 They seem to be sorted in reverse order by node ID (highest number on top). The two reads that mapped on the forward "strand" have their additional information listed in the beginning: names, scores, quality, and identity. The "length" numbers are also the same here for "to" and "from", and while I'm not sure why they are called that, I think they really do mean the length of the node sequence to which the read maps (or the length of the read mapping to the node?). The offset tells where the mapping starts, and then the lengths are usually to the end of the node, but not all mappings have an offset. When there are mismatches, the length that matches is given, then length and sequence of the mismatch, then again the length of the match.  
@@ -350,7 +350,7 @@ It's also possible to again create a simplified graph with graphviz, maybe that'
 vg find -x z.xg -G first3_aln.gam | vg view -dSA first3_aln.gam - | dot -Tpdf -o first3_aln_simple.pdf
 ```
 
-![*simplified DOT version of subgraphs with first three alignments*](day1/sim_reads/first3_aln_simple.pdf)
+![*simplified DOT version of subgraphs with first three alignments*](day1/first3_aln_simple.pdf)
 
 Much simpler indeed! The mismatches are better hidden now, though - the colour code is ranged from green to red based on the mapping quality, so single nucleotide mismatches are not visible, in this example at least.
 
@@ -609,7 +609,7 @@ and
 I wrote a quick [R script](day1/real_data/bwa_vg_comparison.R) to check out the differences between the mapping approaches. The first thing I noticed was that bwa apparently mapped a few (76) reads to two different locations, because I have two score entries for them. vg did not do that, and since I didn't want to decide which score to use I removed both of the duplicates from the data.  
 On the other hand, there were a few reads (five) which did not have a score assigned in the vg data for some reason.
 
-![*histogram of score differences vg - bwa*](day1/real_data/bwa_vg_hist.png)
+![*histogram of score differences vg - bwa*](day1/bwa_vg_hist.png)
 
 Overall, it seems vg and bwa lead to very similar alignment scores - the difference between the two methods is zero in 136,615 of the cases (86%). There are 1,723 reads which mapped a little better with bwa than vg, but the biggest score difference is seven, and the most frequent one is four. Left are 20,813 (13%) reads that mapped better to the genome graph, with a score difference of up to 61, while the most frequent one is five.
 
@@ -630,6 +630,14 @@ mv tiny* construct_tiny/
 mv 1mb1kgp 2401c10.pdf first* z* sim_reads/
 mv *af* filter* allele_frequency/
 mv HG* bwa* vg_map.scores.tsv real_data/
+```
+
+Although, maybe it would be easier to keep the images where they were...
+
+```bash
+mv construct_tiny/*.pdf .
+mv sim_reads/*.pdf sim_reads/*.PNG .
+mv real_data/bwa_vg_hist.png .
 ```
 
 Note that to replicate the results in this document, these new directories have to be used.
