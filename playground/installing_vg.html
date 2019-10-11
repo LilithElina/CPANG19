@@ -1012,7 +1012,8 @@ make: *** [lib/libgbwtgraph.a] Error 2</code></pre>
 <p>The error message is very long, but thanks to <a href="https://stackoverflow.com/questions/19912682/c-error-no-matching-function-for-call-to">this StackOverflow post</a> I think I get the idea. It’s looking to find a function that works the way it is intended to in gfa.cpp in multiple other files, and it finds a number of candidates, but can get none of them to work.</p>
 <p>So far so good. If I had written that script, I would check what I did wrong. I haven’t, though, and I know people have build vg successfully, so an error in the code can’t really be the cause of the problem, can it?</p>
 <p>Hmm, there was a <a href="https://github.com/vgteam/vg/issues/2434">different problem</a> with GBWTGraph about a month ago, so maybe it is something in the code. The proposed solution is this:</p>
-<p>`<code>bash cd deps/gbwtgraph/ git pull origin master</code></p>
+<pre class="bash"><code>cd deps/gbwtgraph/
+git pull origin master</code></pre>
 <pre><code>remote: Enumerating objects: 5, done.
 remote: Counting objects: 100% (5/5), done.
 remote: Compressing objects: 100% (1/1), done.

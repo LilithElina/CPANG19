@@ -914,7 +914,7 @@ So far so good. If I had written that script, I would check what I did wrong. I 
 
 Hmm, there was a [different problem](https://github.com/vgteam/vg/issues/2434) with GBWTGraph about a month ago, so maybe it is something in the code. The proposed solution is this:
 
-````bash
+```bash
 cd deps/gbwtgraph/
 git pull origin master
 ```
