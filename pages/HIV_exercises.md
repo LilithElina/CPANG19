@@ -15,13 +15,13 @@ The data we are using for this is based on an artifical lab mix of five viruses:
 - https://github.com/cbg-ethz/5-virus-mix
 - Di Giallonardo, et al., Nucleic Acids Research, Volume 42, Issue 14, pp. e115, 2014. [https://doi.org/10.1093/nar/gku537](https://doi.org/10.1093/nar/gku537)
 
-The five reference sequences underlying the mix can be find in the above git repository, see at https://github.com/cbg-ethz/5-virus-mix/blob/master/data/REF.fasta.
+The five reference sequences underlying the mix can be found in the above git repository, see at https://github.com/cbg-ethz/5-virus-mix/blob/master/data/REF.fasta.
 
 At home, you can rely on sra-tools (more specifically `fastq-dump`) to download data from SRA. At GTPB, Illumina, 454, and PacBio data is already available at your workstations in the folder `~/cpang19/day2/`.
 
 More concretely, we ask you to work on the following tasks in groups of three or four (in any order, based on your group's preferences):
 
-- Study the effect of using a pan-genone reference on the read alignments. First, spot some examples of regions of high sequence diversity within the reads. Construct a pan-genome representation of the five reference genomes, use it to align reads to, surject them to a linear reference and compare the results to BWA. Second, think of ways to quantify the quality of the alignments across all reads and study the effect of different strategies for pan-genome construction on that measure.
+- Study the effect of using a pan-genome reference on the read alignments. First, spot some examples of regions of high sequence diversity within the reads. Construct a pan-genome representation of the five reference genomes, use it to align reads to, surject them to a linear reference and compare the results to BWA. Second, think of ways to quantify the quality of the alignments across all reads and study the effect of different strategies for pan-genome construction on that measure.
 
 - Analyze the genetic diversity in the five virus mix. Assume you don't know that five viruses went into that sample. Think of ways to visualize the structure of the data sets (Illumina and PacBio). Could you have inferred the number of present viruses from your visualization? Discuss why this is (or is not) possible.
 
@@ -36,7 +36,7 @@ We ask each group to
 <br/>
 
 ### Tools that can be helpful today
-There is a number of VG subcommands that can aid your tasks today, in particular:
+There are a number of tools that can aid you in your tasks today, in particular:
 
 - vg msga
 - seqwish (+ minimap2)
@@ -90,7 +90,7 @@ The same pattern can be used to take a subset of the pacbio reads.
 
 #### Where is the Env gene?
 
-To locate genes, you might want to look at the [NCBI HXB2 annotations](https://www.ncbi.nlm.nih.gov/nucleotide/K03455). Here is the gff3 record for the env gene:
+To locate genes, you might want to look at the [NCBI HXB2 annotations](https://www.ncbi.nlm.nih.gov/nucleotide/K03455). Here is the gff3 record for the *env* gene:
 
 ```
 K03455.1	Genbank	CDS	6225	8795	.	+	0	ID=cds4;Parent=rna0;Dbxref=NCBI_GP:AAB50262.1;Name=AAB50262.1;gbkey=CDS;product=AAB50262.1;protein_id=AAB50262.1

@@ -347,7 +347,7 @@ pandora compare -p pangenome_PRG.fa -r ../../sample_data/27_isolates.tsv -o 27_i
 ```
 
 ```
-START: Fri Oct 11 12:23:56 2019
+START: Mon Oct 14 08:58:12 2019
 
 Using parameters:
         prgfile         pangenome_PRG.fa
@@ -368,7 +368,40 @@ Using parameters:
         log_level       info
 ```
 
-This process also failed in the end because I had a typo in my FASTQ index file.
+I accidentally closed the console before I could copy the final output, but I remember that the run was done some time around 14:00 server time, so it took between five and six hours.
+
+After mapping all the samples to the pangenome graph, Pandora does a variant calling, putting out the VCF header for each gene in the pangenome to the console, but also saving the files in a VCFs/01/ directory. The files contain information for all the isolates per SNP: genotype, mean forward/reverse coverage, median forward/reverse coverage, summed forward/reversed coverage and number of gaps.
+
+If there was also output for anything else, I sadly missed it when I closed the console.
+
+The output directory now contains subdirectories for all clinical isolates with the same output data I got from mapping a single sample: *kmer_covgs.txt*, *kmer_probs.txt*, *pandora.consensus.fq.gz*, and *pandora.pangraph.gfa*. The directory also contains three other files: *pandora_multisample_consensus.vcf*, *pandora_multisample.matrix*, *pandora_multisample.vcf_ref.fa*, and the subdirectory for the single VCF files (with 2266 files, one for each core gene).
+
+Let's start with the *pandora_multisample* files. The VCF reference is a multifasta file with one sequence per gene graph. I assume this is some kind of consensus sequence file, but I don't know for sure.  
+The matrix file lists all the genes and then, in a tab separated table, states in which samples the gene is present (assuming "1" means presence and "0" means absence). From a short glimpse I would say that most core genes are - as expected - present in all of the 27 clinical isolates I tested.  
+Finally, there is a consensus VCF file. I assume this lists variations away from the consensus sequences in the VCF reference file. This is huge, as it contains variants for all genes in all isolates, in the same format as the single VCF files.
+
+#### VCF file format
+
+So what exactly do the VCF files look like? I'm choosing a random entry from the big consensus file:
+
+```
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  CH2682  CH2706  CH2860  CH4528  CH4591  CH4634  ESP027     ESP046  ESP067  ESP088  F1864   F1959   F2006   F2059   F2166   F2224   F2856   MHH1605 MHH1656 MHH1679 MHH1770 MHH1776    ZG3023  ZG3167  ZG8038  ZG8510
+GC00000932_14   120     .       G       C       .       .       SVTYPE=SNP;GRAPHTYPE=SIMPLE     GT:MEAN_FWD_COVG:MEAN_REV_COVG:MED_FWD_COVG:MED_REV_COVG:SUM_FWD_COVG:SUM_REV_COVG:GAPS    0:10,4:11,5:14,0:15,0:42,14:46,15:0.25,0.666667 0:19,8:22,10:25,0:29,0:79,26:89,31:0.25,0.666667   0:13,6:20,9:18,0:27,0:55,19:82,27:0.25,0.666667 0:6,2:3,2:8,0:2,0:25,8:13,6:0,0.666667     0:10,4:10,5:14,0:14,0:43,14:43,15:0.25,0.666667 0:11,5:10,4:14,0:12,0:45,16:40,12:0.25,0.666667 0:31,13:22,10:39,0:30,0:124,39:91,30:0.25,0.666667 0:23,11:33,14:29,0:43,0:93,33:133,43:0,0.666667 0:13,5:15,6:17,0:20,0:54,16:63,20:0.25,0.666667    0:19,8:17,8:25,0:23,0:76,25:70,24:0.25,0.666667 1:14,59:19,77:0,59:0,77:59,177:79,233:0.75,0    0:38,17:38,18:49,0:50,0:153,51:155,54:0,0.666667   0:16,7:14,7:22,0:17,0:67,22:57,22:0.25,0.666667 0:19,9:20,9:25,0:27,0:78,27:83,28:0.25,0.666667    0:25,12:30,12:32,0:39,0:101,36:123,38:0,0.666667        0:13,5:19,8:17,0:25,0:54,17:78,25:0.25,0.666667 0:13,5:20,9:17,0:27,0:53,17:82,28:0.25,0.666667    0:14,6:17,8:19,0:21,0:59,20:68,24:0.25,0.666667 0:11,5:9,4:13,0:12,0:44,16:36,12:0.25,0.666667     0:24,10:27,12:31,0:36,0:96,32:110,37:0.25,0.666667      0:15,7:19,8:19,0:25,0:61,22:76,25:0.25,0.666667 0:17,7:23,10:23,0:31,0:69,23:93,31:0.25,0.666667   0:9,4:7,3:12,0:9,0:37,13:29,9:0.25,0.666667     0:16,8:32,14:21,0:41,0:67,24:129,43:0.25,0.666667  0:36,15:37,16:48,0:49,0:146,47:150,50:0.25,0.666667     0:36,14:26,13:45,0:34,0:144,44:107,39:0,0.666667
+```
+
+The "chromosome" is here the gene, and the position should be measured from the start codon (or wherever the original multiple sequence alignment started). ID, quality and filter are not given ("."), but reference and alternative variant are shown as "G" and "C", so we have a single nucleotide variant. This is also acknowledged in the "info" column: variant type is SNP and graph type is simple (there is also "nested").  
+The next column explains the format of the following sample-wise columns: the values for genotype, mean forward/reverse coverage, median forward/reverse coverage, summed forward/reversed coverage and number of gaps are each separated by colons. The isolates at the end are sorted alphabetically. The GT (genotype) field contains a 0 for all but one isolate, meaning only this one isolates contains the alternative variant according to the [VCF documentation](https://samtools.github.io/hts-specs/VCFv4.2.pdf).
+
+Looking at two example isolates, I think the values can be interpreted the following way:
+
+isolate | GT | MEAN_FWD_COVG | MEAN_REV_COVG | MED_FWD_COVG | MED_REV_COVG | SUM_FWD_COVG | SUM_REV_COVG | GAPS
+--------|----|---------------|---------------|--------------|--------------|--------------------|--------------|-----
+CH2682  | 0  | 10,4          | 11,5          | 14,0         | 15,0         | 42,14              | 46,15        | 0.25,0.666667
+F1864   | 1  | 14,59         | 19,77         | 0,59         | 0,77         | 59,177              | 79,233       | 0.75,0
+
+Isolate CH2682 has the wildtype genotype, but does show a little coverage of the alternative allele (e.g. forward coverage 42 reads for the wildtype, 14 for the alternative, and 46 and 15 on the reverse strand). F1864 on the other hand has a strong preference for the alternative allele (59 to 177 forward and 79 to 233 reverse reads). Is it common to have almost equal forward and reverse coverage?
+
+### Core SNP tree
 
 
 
@@ -421,7 +454,14 @@ Clicking on nodes in Bandage returns some more details: apparently all of them a
 ## And answers
 
 - The numbers in the PRG file are separators of different parts of the graph.
-- The reason why single graphs after indexing are so loopy is Bandage iself, which has no other possibility of visualising the graphs.
+- The reason why single graphs after indexing are so loopy is Bandage itself, which has no other possibility of visualising the graphs.
 - Gene presence and absence should be found in the matrix file.
 - A reference for variant calling is not needed. It happens automatically when using `pandora compare`.
 - The de novo discovery can be used to complement the graph.
+
+## More questions
+
+- What are the sequences in pandora_multisample.vcf_ref.fa?
+- What is the GAPS value in the VCF files?
+- What does it mean when a variant has almost equal forward and reverse coverage?
+- Why don't we get the same output when mapping single or multiple samples?
