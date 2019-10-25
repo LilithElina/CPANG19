@@ -366,9 +366,9 @@ Using parameters:
         max_covg        300
         genotype        0
         log_level       info
-
 ```
 
+This process also failed in the end because I had a typo in my FASTQ index file.
 
 
 
