@@ -4,16 +4,16 @@ title: Learning objectives
 description: Description of CPANG19 learning objectives
 ---
 
-Participants first will learn about limitations of linear reference-based methods and work through a brief refresher or introduction to standard approaches for processing sequencing data, including read alignment and variant calling.
-Provided these motivating examples, we will use data from a variety of relevant sources to develop an intuition about pangenomic methods and a practical familiarity with applicable tools.
+Participants will first learn about limitations of linear reference-based methods and work through a brief refresher or introduction to standard approaches for processing sequencing data, including read alignment and variant calling.
+Provided with these motivating examples, we will use data from a variety of relevant sources to develop an intuition about pangenomic methods and a practical familiarity with applicable tools.
 
 We will mostly use vg and other methods that read and write [GFA](https://github.com/GFA-spec/GFA-spec).
 
 For our exploration we have collected several data sets that combine genomic and phenotypic information, with a focus on contexts that are difficult to approach using standard linear reference methods:
 
-* Bacteria (with resistance phenotypes) http://www.nature.com/articles/nmicrobiol201641
-* HLA typing, e.g. from ONT data (tobi can ask whether we can use data from Wigard Klosterman)
-* Yeast (with growth phenotypes) NCYC collection TODO Erik: get data from Ignacio
+* Bacteria (with resistance phenotypes) from this [publication](http://www.nature.com/articles/nmicrobiol201641)
+* HLA typing, e.g. from ONT data
+* Yeast (with growth phenotypes) from the NCYC collection
 * Viral pooled population studies (HPV?)
 
 Using these data we work through various modules based on different functional aspects of pangenomics.
@@ -61,7 +61,7 @@ Exercises:
 
 Exercises:
 
-- Run an assembler on a trivial (but real) data set and visualize the result with [Bandage](https://github.com/rrwick/Bandage). (TODO: which data?)
+- Run an assembler on a trivial (but real) data set and visualize the result with [Bandage](https://github.com/rrwick/Bandage).
 - Write a script to count the contigs and edges in a GFA format output from this assembly process.
 
 #### Collections of haplotypes
@@ -91,18 +91,11 @@ Objectives:
 - Understand the basic principles behind read alignment, and how these are complicated by aligning reads to a graph.
 - Have the ability to make alignments and interrogate the result to learn basic information like read coverage or putative variants.
 
-Exercises:
-
-- TODO
-
-### Variant calling
-
-TODO
-
-### (bonus) association study or population study
 
 <br/>
 
-## Back
+-----
 
-Back to [main page](../index.md)
+<br/>
+
+Back to [main page](/index.html).

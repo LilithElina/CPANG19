@@ -1,2 +1,7 @@
+.bundle
+.sass-cache
+Gemfile.lock
+_site
+*.gem
 photos/
 .Rproj.user

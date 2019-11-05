@@ -5,7 +5,7 @@ title: Missing genome reconstruction
 
 ## Missing genome reconstruction in HIV
 
-This file works with the [HIV](pages/HIV_exercises.md) data set, assuming you only have four instead of the five reference genomes.
+This file works with the [HIV](./HIV_exercises.html) data set, assuming you only have four instead of the five reference genomes.
 
 Let's make a reference graph, align reads to it, and use surjection and k-means clustering to attempt to find the reads that map to the fifth genome. Finally, we'll assemble these and see if it matches known information about the fifth genome.
 
@@ -127,7 +127,8 @@ ggbiplot(pacbio.dist.pca) + geom_point(aes(color=pacbio.dist[5:nrow(pacbio.dist)
 
 <br/>
 
-## Back
+-----
 
-Back to [main page](../index.md)
+<br/>
 
+Back to [main page](/index.html).

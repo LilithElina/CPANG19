@@ -12,9 +12,9 @@ In this practical, we explore ways of implementing such a gene-level pan-genome 
 ## Data
 Today, we will mostly work on E. coli data. On your workstations you find the following data sets:
 
-- `/media/gtpb_shared_drive/To_Participant/bacteria/ncbi-whole-genomes` one file for each complete E. coli strain present at NCBI, containing the **complete reference genome** for that strain,
-- `/media/gtpb_shared_drive/To_Participant/bacteria/ncbi-genes` one file for each of these NCBI E. coli strains containing one line per **gene**,
-- `/media/gtpb_shared_drive/To_Participant/bacteria/reads` whole genome sequence data for a (random) subset of 10 E.coli strains for this study: [Earle et al., 2015](http://dx.doi.org/10.1038/nmicrobiol.2016.41),
+- `/media/gtpb_shared_drive/To_Participant/bacteria/ncbi-whole-genomes` one file for each complete *E. coli* strain present at NCBI, containing the **complete reference genome** for that strain,
+- `/media/gtpb_shared_drive/To_Participant/bacteria/ncbi-genes` one file for each of these NCBI *E. coli* strains containing one line per **gene**,
+- `/media/gtpb_shared_drive/To_Participant/bacteria/reads` whole genome sequence data for a (random) subset of 10 *E.coli* strains for this study: [Earle et al., 2015](http://dx.doi.org/10.1038/nmicrobiol.2016.41),
 - `/media/gtpb_shared_drive/To_Participant/bacteria/contigs` the result of running the Minia3 assembler on the reads provided in the above directory.
 
 <br/>
@@ -156,6 +156,10 @@ vg map -d x -f reads.fq.gz -j | pv -l > /dev/null
 	bedtools getfasta -fi $b.fna -bed fix.gff -name > $b.fa; \
 	done;
 
-### Back
+<br/>
 
-Back to [main page](../index.md).
+-----
+
+<br/>
+
+Back to [main page](/index.html).

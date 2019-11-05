@@ -1,8 +1,15 @@
 ---
-layout: page
+#
+# By default, content added below the "---" mark will appear in the home page
+# between the top bar and the list of recent posts.
+# To change the home page layout, edit the _layouts/home.html file.
+# See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
+#
+layout: home
 title: CPANG19
+list_title: Protocols
 tagline: Computational PANGenomics
-description: Computational Pangenomics Course taught at GTPB in  2019
+description: Computational Pangenomics Course taught at GTPB in 2019
 ---
 
 ![CPANG18](/assets/Header.png)
@@ -13,49 +20,8 @@ Reference genomes have become central to bioinformatics approaches, and form the
 ## Target Audience
 This course is oriented towards biologists and bioinformaticians with at least an intermediate level of experience working with sequencing data formats and methods in the unix shell. The course will be of particular interest to researchers investigating organisms without a reference genome or populations featuring high levels of genetic diversity.
 
----
-
-## Course Documentation 
-All the datasets used for this training course are available in the documentation.
-
 <br/>
-
-### Day 1
-#### [Intro slides](assets/day1-intro.pdf) [PDF Download]
-#### [Slides](https://docs.google.com/presentation/d/1Iy0RaKseVhgmoKT9Hrzdh3sb2IWOF6GfmVm-y4di0dw/edit?usp=sharing) [Google drive]
-#### Practical 1: [toy examples](pages/toy_examples.md)
-
-<br/>
-
-### Day 2
-#### [Slides](https://docs.google.com/presentation/d/1vClnCkGPZwqpVBZRbc4WQErlKNWCOWGaxRLmyuOZas0/edit?usp=sharing) [Google drive]
-#### Practical 2: [HIV](pages/HIV_exercises.md)
-
-<br/>
-
-### Day 3
-#### [Slides](https://docs.google.com/presentation/d/1RrfXMI7mpRtYu-H5OswPL2LZcIN_OC0NuI_m6mwU38U/edit?usp=sharing) [Google drive]
-#### Practical 3: [Bacteria](pages/bacteria.md)
-
-<br/>
-
-### Day 4
-#### [Slides](https://docs.google.com/presentation/d/1xO40HtzgT-IFkM_93GWLi8wxOw4uADoH4rnuXQ8pu9Y/edit?usp=sharing) [Google drive]
-#### Practical 4: [MHC](pages/mhc.md)
-<br/>
-
-### Day 5
-#### [Slides](https://docs.google.com/presentation/d/1Yabcw_M5gCcCv9DJQ4d3Fp0X-GzooP-y08Qp0Fb7Iuc/edit?usp=sharing) [Google drive]
-#### [related slides](https://docs.google.com/presentation/d/10KDUnRJyKwi5q9khCcb0C9Mb52XcGZbfvFFF0nNCbGg/edit?usp=sharing) [Google drive]
-#### Practical 5: [MHC (continued)](pages/mhc.md)
-
 
 ---
 
-### [Learning objectives](pages/learning_objective.md)
-
-### [Instructors](pages/instructors.md)
-
----
-
-The source for this course webpage is [on github](https://github.com/LilithElina/CPANG19), forked from this [original repo](https://github.com/GTPB/CPANG19).
+<br/>

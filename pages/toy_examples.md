@@ -230,11 +230,14 @@ Use minimap2 and seqwish to build graphs from the HLA gene haplotypes in vg/test
 Follow the steps in https://github.com/ekg/yeast-pangenome/blob/master/steps.sh to build and visualize a pangenome from yeast.
 (Note that we filter the length of our alignments using fpa. This can also be applied to the GRCh32 HLA alts.)
 
-Can we index this graph and map reads against it (e.g. from [YPRP]( https://yjx1217.github.io/Yeast_PacBio_2016/welcome/) ?
+Can we index this graph and map reads against it (e.g. from [YPRP]( https://yjx1217.github.io/Yeast_PacBio_2016/welcome/))?
 
 Use Bandage and odgi to visualize graphs (convert to GFA first).
 
-### Back
+<br/>
 
-Back to [main page](../index.md).
+-----
 
+<br/>
+
+Back to [main page](/index.html).

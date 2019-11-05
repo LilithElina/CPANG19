@@ -12,7 +12,7 @@ Today you will work in a more self-directed fashion. The driving questions are:
 
 The data we are using for this is based on an artifical lab mix of five viruses:
 
-- https://github.com/cbg-ethz/5-virus-mix
+- [GitHub repository](https://github.com/cbg-ethz/5-virus-mix)
 - Di Giallonardo, et al., Nucleic Acids Research, Volume 42, Issue 14, pp. e115, 2014. [https://doi.org/10.1093/nar/gku537](https://doi.org/10.1093/nar/gku537)
 
 The five reference sequences underlying the mix can be found in the above git repository, see at https://github.com/cbg-ethz/5-virus-mix/blob/master/data/REF.fasta.
@@ -98,7 +98,7 @@ K03455.1	Genbank	CDS	6225	8795	.	+	0	ID=cds4;Parent=rna0;Dbxref=NCBI_GP:AAB50262
 
 #### Circular HIV genome confusion
 
-An earlier version of the [ideas.md](./ideas.md) walkthrough suggested that you should circularize the HIV genome. This is not the case, and the apparent circularity of the REF.fasta results from either homology between the start and end of some of the strains or from the generation of the references based on plasmid resequencing.
+An earlier version of the [ideas.md](./ideas.html) walkthrough suggested that you should circularize the HIV genome. This is not the case, and the apparent circularity of the REF.fasta results from either homology between the start and end of some of the strains or from the generation of the references based on plasmid resequencing.
 
 #### GFA output and Bandage
 
@@ -126,7 +126,7 @@ vg view -Fv fixed.gfa > g.vg
 
 #### Installing R packages
 
-In [ideas.md](./ideas.md) you are given some R scripts to try. These require several packages that may not be installed on your system. To install them, in R run:
+In [ideas.md](./ideas.html) you are given some R scripts to try. These require several packages that may not be installed on your system. To install them, in R run:
 
 ```R
 install.packages("tidyverse")
@@ -173,6 +173,8 @@ vg find -x z.xg -A node2430.vg >z.node2430.gam
 
 <br/>
 
-### Back
+-----
 
-Back to [main page](../index.md).
+<br/>
+
+Back to [main page](/index.html).

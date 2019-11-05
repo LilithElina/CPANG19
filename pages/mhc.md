@@ -32,13 +32,13 @@ It should be noted that there are other methods that you could use to build a gr
 
 ## MHC typing using variation graphs
 
-An interesting question to ask for a new sample is which MHC scaffold (or pair of scaffolds) will represent its MHC region best. In reality, any individual's MHC haplotypes are unlikely to match any of the MHC scaffolds well. However, they will have recombinant subsequences in common with the scaffolds. Moreover, previous studies have demonstrated benefits in downstream application for choosing more representative sequences for the reference, even if these sequences are imperfect (see Dilthey et al., 2014). 
+An interesting question to ask a new sample is which MHC scaffold (or pair of scaffolds) will represent its MHC region best. In reality, any individual's MHC haplotypes are unlikely to match any of the MHC scaffolds well. However, they will have recombinant subsequences in common with the scaffolds. Moreover, previous studies have demonstrated benefits in downstream application for choosing more representative sequences for the reference, even if these sequences are imperfect (see Dilthey et al., 2014). 
 
 We have provided you with a set of sequencing reads from the Human Genome Structural Variation Consortium in the path `/media/gtpb_shared_drive/To_Participant/MHC/TrioData`. They come from a parent-child trio: the Han Chinese trio HG00512-HG00513-HG00514. The highest-numbered sample is the child. You will have both Illumina paired end short reads and PacBio long reads. Rather than providing the entire genomic dataset, we have extracted reads that mapped to the MHC region or one of the alternate scaffolds using a conventional read mapper. Of course, that means that these datasets are already biased by mapping to a linear reference. However, the volume of data for a full genomic dataset is probably too computationally demanding for an exercise in this environment.
 
 We have also provided you with a different set of reds for the individual HG002 in the path `/media/gtpb_shared_drive/To_Participant/MHC/HG002`. This folder contains CCS reads and ultralong ONT reads for the MHC region of this individual. The reads are split by haplotype using trio binning and phasing. The file `*.H1.*` contains reads from the first haplotype, `*.H2.*` from the second haplotype and `*.untagged.*` contains reads which could not be confidently assigned to a haplotype.
 
-The reference alles for each HLA gene are in `/media/gtpb_shared_drive/To_Participant/MHC/IMGT_alleles`. The alleles are grouped per gene, containing either genomice sequence (`*_gen.fasta`), coding sequences (`*_nuc.fasta`) and protein sequences (`*_prot.fasta`).
+The reference alleles for each HLA gene are in `/media/gtpb_shared_drive/To_Participant/MHC/IMGT_alleles`. The alleles are grouped per gene, containing either genomice sequence (`*_gen.fasta`), coding sequences (`*_nuc.fasta`), or protein sequences (`*_prot.fasta`).
 Use these to establish HLA genotypes for each genome.
 
 The GRCh38 ALTs (alternative haplotypes) for the MHC are provided in `/media/gtpb_shared_drive/To_Participant/MHC/MHC.fa.gz`.
@@ -65,6 +65,8 @@ How could you use these variant calls to determine which MHC scaffold(s) are mos
 
 <br/>
 
-## Back
+-----
 
-Back to [main page](../index.md).
+<br/>
+
+Back to [main page](/index.html).
