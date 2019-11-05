@@ -5,3 +5,17 @@ _site
 *.gem
 photos/
 .Rproj.user
+.RData
+.Rhistory
+playground/day1/allele_frequency
+playground/day1/construct_tiny
+playground/day1/real_data
+playground/day1/sim_reads
+playground/day2
+
+!playground/day1/allele_frequency/filter_vcf_maxAF.sh
+!playground/day1/allele_frequency/filter_vcf_minAF.sh
+!playground/day1/real_data/bwa_mem.scores.tsv
+!playground/day1/real_data/bwa_vg_comparison.R
+!playground/day1/real_data/vg_map.scores.tsv
+!playground/day2/pics/
