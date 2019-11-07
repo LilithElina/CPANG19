@@ -9,7 +9,7 @@ layout: home
 title: CPANG19
 list_title: Protocols
 tagline: Computational PANGenomics
-description: Computational Pangenomics Course taught at GTPB in 2019
+description: Computational Pangenomics Course taught at GTPB
 ---
 
 ![CPANG18](/assets/Header.png)
