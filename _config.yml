@@ -57,3 +57,7 @@ disqus:
 # enable linking to internal content (on the same page)
 kramdown:
   auto_ids: true
+ 
+# set base URL for GitHub page
+url: https://lilithelina.github.io/
+baseurl: /CPANG19
