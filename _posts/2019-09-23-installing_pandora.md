@@ -12,7 +12,7 @@ author: LilithElina
 
 ## Installation of Pandora on our servers
 
-Pandora comes inside of a [Singularity](https://sylabs.io/docs/) container, which should make the installation easy, especially since I already installed Singularity in my [vg installation protocol]({% post_url 2019-09-16-installing_vg %}).
+Pandora comes inside of a [Singularity](https://sylabs.io/docs/) container, which should make the installation easy, especially since I already installed Singularity in my [vg installation protocol]({{ site.baseurl }}{% post_url 2019-09-16-installing_vg %}).
 
 ```bash
 singularity pull shub://rmcolq/pandora:pandora
@@ -320,4 +320,4 @@ Except for a deprecation warning, this looks fine.
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

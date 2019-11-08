@@ -90,9 +90,9 @@ singularity selftest
  + test -u /usr/bin/miniconda3/libexec/singularity/bin/action-suid                     (retval=1) ERROR
 ```
 
-Hmm, I hope that works... I'll [try first with Pandora]({% post_url 2019-09-23-installing_pandora %}), since that comes in a Singularity container and I don't have to check how using a Docker container within Singularity will work.
+Hmm, I hope that works... I'll [try first with Pandora]({{ site.baseurl }}{% post_url 2019-09-23-installing_pandora %}), since that comes in a Singularity container and I don't have to check how using a Docker container within Singularity will work.
 
-I had some problems with this conda installation of Singularity, so I removed it and instead used the official installation instructions (see [Pandora protocol]({% post_url 2019-09-23-installing_pandora %})). Now everything should be working fine.
+I had some problems with this conda installation of Singularity, so I removed it and instead used the official installation instructions (see [Pandora protocol]({{ site.baseurl }}{% post_url 2019-09-23-installing_pandora %})). Now everything should be working fine.
 
 
 ```bash
@@ -183,7 +183,7 @@ fs     0x0
 gs     0x0
 ```
 
-None of this appears when exiting the Pandora image, so I assume that Singularity did not manage to convert the Docker container properly. If I want the latest vg version, I think I'll just have to build from source and check out vg from time to time as mentioned in the CPANG19 [toy examples](/pages/toy_examples.html) (`git clone https://github.com/vgteam/vg.git`).
+None of this appears when exiting the Pandora image, so I assume that Singularity did not manage to convert the Docker container properly. If I want the latest vg version, I think I'll just have to build from source and check out vg from time to time as mentioned in the CPANG19 [toy examples]({{ "/pages/toy_examples.html" | relative_url}}) (`git clone https://github.com/vgteam/vg.git`).
 
 ```bash
 rm vg_v1.19.0.sif
@@ -1232,4 +1232,4 @@ It *is* done!
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

@@ -27,4 +27,4 @@ Today you will learn how to align long reads to graphs and how to error correct 
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

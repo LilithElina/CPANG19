@@ -39,4 +39,4 @@ He graduated from the University of Helsinki with a masters degree in computer s
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

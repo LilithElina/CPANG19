@@ -240,4 +240,4 @@ Use Bandage and odgi to visualize graphs (convert to GFA first).
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).
