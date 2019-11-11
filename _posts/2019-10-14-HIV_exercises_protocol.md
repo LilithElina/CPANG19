@@ -5,7 +5,7 @@ categories: exercise
 author: LilithElina
 ---
 
-While we were provided materials for the toy examples in [day one]({% post_url 2019-10-07-toy_examples_protocol %}), I have to download the HIV data for day two myself. At least we have the sources in [the materials](/pages/HIV_exercises.html), so it shouldn't be a problem, and I would like to do this before starting with our own bacterial data. I also have an RMarkdown [protocol](/course_results/aims_and_results.Rmd) from my group for this day which I will partly follow.
+While we were provided materials for the toy examples in [day one]({{ site.baseurl }}{% post_url 2019-10-07-toy_examples_protocol %}), I have to download the HIV data for day two myself. At least we have the sources in [the materials]({{ "/pages/HIV_exercises.html" | relative_url }}), so it shouldn't be a problem, and I would like to do this before starting with our own bacterial data. I also have an RMarkdown [protocol]({{ "/course_results/aims_and_results.Rmd" | relative_url }}) from my group for this day which I will partly follow.
 
 * Do not remove this line (it will not be displayed)
 {:toc}
@@ -78,7 +78,7 @@ This was already too big for the standard DOT format, so we visualised it in Ban
 vg view hiv_6genomes.vg > hiv_6genomes.gfa
 ```
 
-![variant graph in Bandage](/playground/day2/pics/Bandage_hiv_6genomes.PNG)
+![variant graph in Bandage]({{ "/playground/day2/pics/Bandage_hiv_6genomes.PNG" | relative_url }})  
 *variant graph in Bandage*
 
 I'd also like to try the [Inkscape](https://inkscape.org/) method suggested in the course instructions as well:
@@ -90,9 +90,9 @@ vg viz -x hiv_6genomes.xg -o hiv_6genomes.svg
 
 This kind of visualisation is much nicer, since you can see the paths of the genomes through the graph:
 
-![variant graph with vg viz and Inkscape - start](/playground/day2/pics/Inkscape_hiv_6genomes_b.PNG)
+![variant graph with vg viz and Inkscape - start]({{ "/playground/day2/pics/Inkscape_hiv_6genomes_b.PNG" | relative_url}})  
 *variant graph with vg viz and Inkscape - start*
-![variant graph with vg viz and Inkscape - random region](/playground/day2/pics/Inkscape_hiv_6genomes.PNG)
+![variant graph with vg viz and Inkscape - random region]({{ "/playground/day2/pics/Inkscape_hiv_6genomes.PNG" | relative_url }})  
 *variant graph with vg viz and Inkscape - random region*
 
 
@@ -336,15 +336,16 @@ path 5 NC_001802.1 0.194203 0.318841 0.486957 74 122 186
 
 The options are the same as before (`-i` and `-o`), with the addition of `-x` for the path padding and `-R` indicating that there should be only one path per row. The additional output lists the different paths and other, not further specified data about them.
 
-![variant graph with seqwish and odgi](/playground/day2/pics/hiv_seqwish.png)
+![variant graph with seqwish and odgi]({{ "/playground/day2/pics/hiv_seqwish.png" | relative_url }})  
 *variant graph with seqwish and odgi*
 
 The resulting graph shows coloured paths per reference genome, and hints at a circular structure, with one line connecting both ends of the graph representation.
 
 This was also discussed in the course, and problematic are probably the long terminal repeats (LTRs) of the HIV genome(s) which irritate seqwish:
 
-![HIV genome structure](https://image.slidesharecdn.com/lectureonaidsforfirstmbbs-140825045915-phpapp02/95/a-lecture-on-aids-for-mbbs-2014-10-638.jpg?cb=1408943225)
+![HIV genome structure](https://image.slidesharecdn.com/lectureonaidsforfirstmbbs-140825045915-phpapp02/95/a-lecture-on-aids-for-mbbs-2014-10-638.jpg?cb=1408943225)  
 *HIV genome structure*
+{: #genome }
 
 ### `vg msga` using only the six reference FASTA
 
@@ -356,7 +357,7 @@ vg msga -f 6ref.fasta > 6ref.vg
 
 This is a little slower than the minimap2/seqwish approach and I wouldn't recommend it with much more or longer sequences.
 
-Indexing is also problematic at this scale, so we prune the graph to reduce complexity for the GCSA2 algorithm as described in the [course materials](/pages/HIV_exercises.html):
+Indexing is also problematic at this scale, so we prune the graph to reduce complexity for the GCSA2 algorithm as described in the [course materials]({{ "/pages/HIV_exercises.html" | relative_url }}):
 
 ```bash
 vg prune 6ref.vg > 6ref_prune.vg
@@ -370,7 +371,7 @@ Now I can again create an SVG file to look at in Inkscape:
 vg viz -x 6ref.xg -o 6ref.svg
 ```
 
-![variant graph with vg viz and Inkscape - start](/playground/day2/pics/Inkscape_6ref.PNG)
+![variant graph with vg viz and Inkscape - start]({{ "/playground/day2/pics/Inkscape_6ref.PNG" | relative_url }})  
 *variant graph with vg viz and Inkscape - start*
 
 This graph is again linear and at least the start of the graph looks exactly like that of the first graph, created on the basis of HIV-1 with the five other references added.
@@ -398,7 +399,7 @@ vg index -g hiv_seqwish.gcsa hiv_seqwish_prune.vg
 vg map -d hiv_seqwish -f reads/SRR961669.2.fastq > hiv_seqwish_nano.gam
 ```
 
-Like in [day one]({% post_url 2019-10-07-toy_examples_protocol %}), we can now have a look at the mean read identity to see if the different graphs lead to different mapping results:
+Like in [day one]({{ site.baseurl }}{% post_url 2019-10-07-toy_examples_protocol %}), we can now have a look at the mean read identity to see if the different graphs lead to different mapping results:
 
 ```bash
 vg view -a 6ref_nano.gam | jq .identity | awk '{i+=$1; n+=1} END {print i/n}'
@@ -547,20 +548,118 @@ odgi viz -i 6ref.og -A SRR -R -S -x 5000 -P 1 -X 3 -o 6ref.png
 
 We used some more options in the `odgi vis` call this time: `-A` is supposed to add "alignment-related visual motifs" to paths with certain prefixes (in this case "SRR"), which I guess is useless here since I couldn't include alignment paths. `-R` is again the option to display one path per row, `-S` visualises forward and reverse strands, `-x` sets the width of the output image, `-P` sets the path height, and `-X` the path padding.
 
-![variant graph with vg msga and odgi](/playground/day2/pics/6ref.png)
+![variant graph with vg msga and odgi]({{ "/playground/day2/pics/6ref.png" | relative_url }})  
 *variant graph with vg msga and odgi*
-![augmented variant graph with odgi](/playground/day2/pics/6ref_nano.png)
+![augmented variant graph with odgi]({{ "/playground/day2/pics/6ref_nano.png" | relative_url }})  
 *augmented variant graph with odgi*
 
 The augmented graph contains a lot of sequence fragments that don't fit any of the six reference genomes, which is interesting since the HIV strain mix that was sequenced here consisted of five of those strains only. Our conclusion in the course was that it is "tricky" to augment the variation graph with long reads, and maybe that is what we meant, but we never further discussed this as far as I can remember.
 
 
-## Open questions day two
+## AIM2 - Where is variation in viral genes?
+
+The second question we wanted to answer was where the most variation can be found in the HIV genes. We did this in a quick-and-dirty fashion by augmenting our genome graph with the HIV-1 annotation and then analysing the annotated sequences.
+
+### Augmenting a graph with genome annotation
+
+I am going to augment the third graph I created - the one based on the six references, created with `vg msga`. Since the seqwish graph is circular, I prefer the vg graphs...
+
+First, I have to fetch the annotation from [NCBI](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/864/765/GCF_000864765.1_ViralProj15476/GCF_000864765.1_ViralProj15476_genomic.gff.gz), though.
+
+```bash
+wget ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/864/765/GCF_000864765.1_ViralProj15476/GCF_000864765.1_ViralProj15476_genomic.gff.gz
+gunzip GCF_000864765.1_ViralProj15476_genomic.gff.gz
+```
+
+There is an actual annotation function called `vg annotate` that can add GFF ([General Feature Format](https://en.wikipedia.org/wiki/General_feature_format)) or BED ([Browser Extensible Data](http://genome.ucsc.edu/FAQ/FAQformat#format1)) files to an xg indexed graph and return a gam, vg or tsv file:
+
+```bash
+vg annotate -x 6ref.xg -f GCF_000864765.1_ViralProj15476_genomic.gff > 6ref_annot.tsv
+```
+
+The TSV file is not readable, though, so I think this part of the help information for `vg augment` is not correct, or I misunderstood something.
+
+```bash
+vg annotate -x 6ref.xg -f GCF_000864765.1_ViralProj15476_genomic.gff > 6ref_annot.vg
+vg view 6ref_annot.vg -j
+```
+
+```
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  [io::ProtobufIterator] tag "GAM" for Protobuf that should be "VG"
+ERROR: Signal 6 occurred. VG has crashed. Run 'vg bugs --new' to report a bug.
+Stack trace path: /tmp/vg_crash_5G4Xup/stacktrace.txt
+```
+
+The same is true for ending the output file on ".vg". Apparently the output is in GAM format and that's that.
+
+```bash
+vg annotate -x 6ref.xg -f GCF_000864765.1_ViralProj15476_genomic.gff > 6ref_annot.gam
+```
+
+In order to be able to visualise this, I have to augment the annotation into the graph... Let's see if `vg augment -i` works this time:
+
+```bash
+vg augment 6ref.vg -i 6ref_annot.gam > 6ref_annot.vg
+vg index -x 6ref_annot.xg 6ref_annot.vg
+vg viz -x 6ref_annot.xg -o pics/6ref_annot.svg
+```
+
+![variant graph with annotation - start]({{ "/playground/day2/pics/6ref_annot_start.PNG" | relative_url }})  
+*variant graph with annotation - start*
+
+This worked, yay!  
+As a reminder: 896, HXB2, JRCSF, NL43, and YU2 are the five reference genomes from the mix, and NC_00.1802.1 is the HIV-1 reference genome I downloaded from NCBI. The other paths that are now present in the graph are the genes from the annotation. Scroll back up to the [HIV genome structure](#genome) figure for a reminder of the HIV genome structure.
+
+![variant graph with annotation - first genes]({{ "/playground/day2/pics/6ref_annot_1gene.PNG" | relative_url }})  
+*variant graph with annotation - first genes*
+
+It seems that four entries in the annotation are the same in the beginning - NP_057849.4, NP_057850.1, *gag*, and *gag-pol*, but NP_057849.4 and *gag* end sooner than the other two, so I assume that NP_057849.4 is, in fact, *gag*, and NP_057850.1 is *gag-pol* (i.e. the *gag* gene together with the *pol* gene).
+
+A similar pattern can be seen throughout the rest of the annotated graph - there is always one gene name and one associated "NP number": in the annotation, "gene" features are the ones with the gene names, and "CDS" features are the ones with the NP numbers. Apparently `vg annotate` adds both of those features (while ignoring others like untranslated regions and "biological regions"). This is a little annoying and I think for real projects, annotations will probably have to be cleaned, as long as it's not possible to select which features `vg annotate` will use.
+
+One simple way to analyse sequence variability now is to count the number of nodes per annotated gene - more nodes should mean more variable sequences when you normalise for the gene length.
+
+This analysis should be easy to do in R using the graph in JSON format:
+
+```bash
+vg view 6ref_annot.vg -j > 6ref_annot.json
+```
+
+```
+graph path '' invalid: edge from 3116 end to 3171 start does not exist
+graph path '' invalid: edge from 246 end to 3174 start does not exist
+graph path '' invalid: edge from 3174 end to 3179 start does not exist
+graph path '' invalid: edge from 3148 end to 3151 start does not exist
+[vg view] warning: graph is invalid!
+```
+
+The conversion seems to have worked despite the error messages, so I wrote an [R script]({{ "/playground/day2/nodespergene.R" | relative_url }}) that uses [tidyjson](https://github.com/sailthru/tidyjson) and the [tidyverse](https://www.tidyverse.org/) to clean up the graph and plot the number of nodes per gene (normalised by gene length).
+
+Since the GFF annotation file is a little "crowded" with information and not easily readable by R, I downloaded the [tabular version](https://www.ncbi.nlm.nih.gov/genome/proteins/10319?genome_assembly_id=437318) of the HIV-1 annotation for this task. Another step I took to make this analysis a little easier was extracting just the paths from the graph into JSON format, since the whole graph proved hard to parse:
+
+```bash
+jq '.path' 6ref_annot.json > 6ref_annot_paths.json
+```
+
+At first I used the "Length" information from the tabular annotation file to normalise the number of nodes per gene, which lead to this figure:
+
+![Number of nodes per gene divided by protein length]({{ "/playground/day2/pics/nodespergene1.PNG" | relative_url }})
+
+This was not the same result we got in the course, though, and it seemed weird that *rev* and *tat* had such a high number of nodes while being very short. Looking back at the [HIV genome structure](#genome) again shows why: both genes seem to encompass *vpu* and (partly) *env*. The length listed in the annotation is very short and relates to the protein; the region covered between "start" and "end" of all genes is much larger. Since the start and end values were used to create the paths through the graph, I used these values to calculate gene length and create the figure again:
+
+![Number of nodes per gene divided by gene length]({{ "/playground/day2/pics/nodespergene2.PNG" | relative_url }})
+
+This is the same result we got in the course: the most variable genes in the HIV(-1) genome based on the number of nodes in the graph are *vpu*, *nef*, and *env*. *vpu* and *env* are expressed from a bicistronic mRNA, with Env being one of the viral structural proteins while Vpu is specific for HIV-1 and therefore an accessory regulatory protein. Nef is ["the most immunogenic of the accessory proteins"](https://www.hiv.lanl.gov/content/sequence/HIV/MAP/landmark.html) of HIV, as it is one of the first produced proteins in infected cells.  
+By far the least variable gene(s) are *gag* an *pol*, or *gag-pol*. They express core structural proteins as a polyprotein and probably have to be more conserved.
+
+
+## Open questions
 
 - How to decide on a `-x` setting in minimap2?
 - What is the significance of the additional output of `odgi viz`?
 - Is there still a pileup option/tool somewhere, if `vg augment` doesn't do it?
-- What is the problem with `vg augment -i`?
+- What is the problem with `vg augment -i` for mapped reads?
 - What's so tricky about augmenting the graph with long reads? Why don't they fit to the references?
 
 <br/>
@@ -569,4 +668,4 @@ The augmented graph contains a lot of sequence fragments that don't fit any of t
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).
