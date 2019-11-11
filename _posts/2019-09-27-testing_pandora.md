@@ -266,7 +266,7 @@ I had a chat with Zamin, but without my data at hand. He says there should be a 
 
 To make the comparison of multiple samples interesting, I decided to work with the 27 isolates from Jelena and Janne's [new paper](https://doi.org/10.3390/cells8101129). That means I also have a genetic distance tree based on 1021 genes of which proteins could be quantified at my disposal as well:
 
-<img src="/playground/Pandora/27_isolates_protein_tree.png" width="150" />  
+<img src="{{ "/playground/Pandora/27_isolates_protein_tree.png" | relative_url}}" width="150" />  
 *Hierarchical clustering by genetic distance based on the 1021 genes for which the encoded proteins were quantified in this study. PAO1-like strains predominate and are colored in blue-, violet-, and green colors, respectively. PA14-like strains are colored in yellow/orange or red (Erdmann et al., 2019).*
 
 To use these isolates, I copied the FASTQ files with the first reads in the pairs to the same sample_data directory where the other single FASTQ file was already located. Then I created a read index with sample ID and FASTQ file name (tab separated) per line as per the Pandora instructions. Now I can start the mapping:
@@ -418,10 +418,10 @@ Isolate CH2682 has the wildtype genotype, but does show a little coverage of the
 
 I randomly took the first graph file - GC00000001_11_na_aln.fa.k15.w14.gfa - to download it to my PC and load it into Bandage. The graph inside is very loopy for a single gene - I think I have to compare this to the multiple sequence alignment.
 
-![*GC00000001_11 in Bandage - overview*](/playground/Pandora/GC00000001_11_Bandage_overview.PNG)
+![*GC00000001_11 in Bandage - overview*]({{ "/playground/Pandora/GC00000001_11_Bandage_overview.PNG" | relative_url }})  
 *Overview of the GC00000001_11 graph in Bandage*
 
-![*GC00000001_11 in Bandage - detail*](/playground/Pandora/GC00000001_11_Bandage_detail.PNG)  
+![*GC00000001_11 in Bandage - detail*]({{ "/playground/Pandora/GC00000001_11_Bandage_detail.PNG" | relative_url }})  
 *Detail of the GC00000001_11 graph in Bandage*
 
 ```bash
@@ -431,7 +431,7 @@ gunzip GC00000001_11_na_aln.fa.gz
 
 I opened the fasta in [UGENE](http://ugene.net/) as a multiple sequence alignment and the sequences look pretty similar to me. They don't all have the same length, but otherwise...
 
-![*Similarity of GC00000001_11 sequences in UGENE*](/playground/Pandora/GC00000001_11_Ugene_consensus.PNG)
+![*Similarity of GC00000001_11 sequences in UGENE*]({{ "/playground/Pandora/GC00000001_11_Ugene_consensus.PNG" | relative_url }})  
 *Similarity of the GC00000001_11 sequences in UGENE*
 
 I think I will have to install [odgi](https://github.com/vgteam/odgi) or get vg to work to see sequence details and figure out where the loops come from.
@@ -440,16 +440,20 @@ I think I will have to install [odgi](https://github.com/vgteam/odgi) or get vg 
 
 The graph that is created by mapping reads to the pangenome (with the standard settings) is not too big, so I think I can download and visualise that as well.
 
-![*pandora.pangraph.gfa in Bandage - overview of CH3797*](/playground/Pandora/CH3797_overview.PNG)
+![*pandora.pangraph.gfa in Bandage - overview of CH3797*]({{ "/playground/Pandora/CH3797_overview.PNG" | relative_url }})  
 *pandora.pangraph.gfa in Bandage - overview of CH3797*
 
-![*pandora.pangraph.gfa in Bandage - detail of CH3797*](/playground/Pandora/CH3797_detail.PNG)
+![*pandora.pangraph.gfa in Bandage - detail of CH3797*]({{ "/playground/Pandora/CH3797_detail.PNG" | relative_url }})  
 *pandora.pangraph.gfa in Bandage - detail of CH3797*
 
 It looks like some of the core genes were combined, either to that huge mess or to smaller, more or less linear, groups. But this is a mapping result, so I'm not sure how one would interpret this.  
 Clicking on nodes in Bandage returns some more details: apparently all of them are only 1 bp long, but their IDs look like those of the core genes I used when creating the "pangenome".
 
+<br/>
+
 *****
+
+<br/>
 
 ## Open Questions
 
@@ -480,4 +484,4 @@ Clicking on nodes in Bandage returns some more details: apparently all of them a
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

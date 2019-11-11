@@ -8,13 +8,13 @@ title: Q&A
 
 ## vg
 
-### [Day 1]({% post_url 2019-10-07-toy_examples_protocol %})
+### [Day 1]({{ site.baseurl }}{% post_url 2019-10-07-toy_examples_protocol %})
 
 - How to choose `k` for GCSA indexing or graph construction?
 - What are the length values in the mapping results?
 - Why do some reads not have a mapping score in vg?
 
-### [Day 2]({% post_url 2019-10-14-HIV_exercises_protocol %})
+### [Day 2]({{ site.baseurl }}{% post_url 2019-10-14-HIV_exercises_protocol %})
 
 - How to decide on a `-x` setting in minimap2?
 - What is the significance of the additional output of `odgi viz`?
@@ -22,7 +22,7 @@ title: Q&A
 - What is the problem with `vg augment -i`?
 - What's so tricky about augmenting the graph with long reads? Why don't they fit to the references better?
 
-## [Pandora]({% post_url 2019-09-27-testing_pandora %})
+## [Pandora]({{ site.baseurl }}{% post_url 2019-09-27-testing_pandora %})
 
 ### General
 
@@ -55,4 +55,4 @@ title: Q&A
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

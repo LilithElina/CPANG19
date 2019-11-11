@@ -98,7 +98,7 @@ K03455.1	Genbank	CDS	6225	8795	.	+	0	ID=cds4;Parent=rna0;Dbxref=NCBI_GP:AAB50262
 
 #### Circular HIV genome confusion
 
-An earlier version of the [ideas.md](./ideas.html) walkthrough suggested that you should circularize the HIV genome. This is not the case, and the apparent circularity of the REF.fasta results from either homology between the start and end of some of the strains or from the generation of the references based on plasmid resequencing.
+An earlier version of the [ideas.md]({{ "/pages/ideas.html" | relative_url }}) walkthrough suggested that you should circularize the HIV genome. This is not the case, and the apparent circularity of the REF.fasta results from either homology between the start and end of some of the strains or from the generation of the references based on plasmid resequencing.
 
 #### GFA output and Bandage
 
@@ -126,7 +126,7 @@ vg view -Fv fixed.gfa > g.vg
 
 #### Installing R packages
 
-In [ideas.md](./ideas.html) you are given some R scripts to try. These require several packages that may not be installed on your system. To install them, in R run:
+In [ideas.md]({{ "/pages/ideas.html" | relative_url }}) you are given some R scripts to try. These require several packages that may not be installed on your system. To install them, in R run:
 
 ```R
 install.packages("tidyverse")
@@ -177,4 +177,4 @@ vg find -x z.xg -A node2430.vg >z.node2430.gam
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

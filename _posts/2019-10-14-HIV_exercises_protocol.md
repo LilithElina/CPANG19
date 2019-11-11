@@ -612,6 +612,7 @@ This worked, yay!
 As a reminder: 896, HXB2, JRCSF, NL43, and YU2 are the five reference genomes from the mix, and NC_00.1802.1 is the HIV-1 reference genome I downloaded from NCBI. The other paths that are now present in the graph are the genes from the annotation. Scroll back up to the [HIV genome structure](#genome) figure for a reminder of the HIV genome structure.
 
 ![variant graph with annotation - first genes]({{ "/playground/day2/pics/6ref_annot_1gene.PNG" | relative_url }})  
+<<<<<<< HEAD
 *variant graph with annotation - first genes*
 
 It seems that four entries in the annotation are the same in the beginning - NP_057849.4, NP_057850.1, *gag*, and *gag-pol*, but NP_057849.4 and *gag* end sooner than the other two, so I assume that NP_057849.4 is, in fact, *gag*, and NP_057850.1 is *gag-pol* (i.e. the *gag* gene together with the *pol* gene).

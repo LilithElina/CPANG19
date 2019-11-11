@@ -162,4 +162,4 @@ vg map -d x -f reads.fq.gz -j | pv -l > /dev/null
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).

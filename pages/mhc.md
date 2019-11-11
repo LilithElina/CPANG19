@@ -69,4 +69,4 @@ How could you use these variant calls to determine which MHC scaffold(s) are mos
 
 <br/>
 
-Back to [main page](/index.html).
+Back to [main page]({{ "/index.html" | relative_url }}).
