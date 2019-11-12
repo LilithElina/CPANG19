@@ -644,11 +644,11 @@ jq '.path' 6ref_annot.json > 6ref_annot_paths.json
 
 At first I used the "Length" information from the tabular annotation file to normalise the number of nodes per gene, which lead to this figure:
 
-![Number of nodes per gene divided by protein length]({{ "/playground/day2/pics/nodespergene1.PNG" | relative_url }})
+![Number of nodes per gene divided by protein length]({{ "/playground/day2/pics/nodespergene1.png" | relative_url }})
 
 This was not the same result we got in the course, though, and it seemed weird that *rev* and *tat* had such a high number of nodes while being very short. Looking back at the [HIV genome structure](#genome) again shows why: both genes seem to encompass *vpu* and (partly) *env*. The length listed in the annotation is very short and relates to the protein; the region covered between "start" and "end" of all genes is much larger. Since the start and end values were used to create the paths through the graph, I used these values to calculate gene length and create the figure again:
 
-![Number of nodes per gene divided by gene length]({{ "/playground/day2/pics/nodespergene2.PNG" | relative_url }})
+![Number of nodes per gene divided by gene length]({{ "/playground/day2/pics/nodespergene2.png" | relative_url }})
 
 This is the same result we got in the course: the most variable genes in the HIV(-1) genome based on the number of nodes in the graph are *vpu*, *nef*, and *env*. *vpu* and *env* are expressed from a bicistronic mRNA, with Env being one of the viral structural proteins while Vpu is specific for HIV-1 and therefore an accessory regulatory protein. Nef is ["the most immunogenic of the accessory proteins"](https://www.hiv.lanl.gov/content/sequence/HIV/MAP/landmark.html) of HIV, as it is one of the first produced proteins in infected cells.  
 By far the least variable gene(s) are *gag* an *pol*, or *gag-pol*. They express core structural proteins as a polyprotein and probably have to be more conserved.
