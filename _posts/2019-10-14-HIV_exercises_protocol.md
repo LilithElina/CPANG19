@@ -298,7 +298,7 @@ The `-X` option tells minimap2 to avoid self and dual mappings, `-c` sets the [C
 [M::main] Real time: 0.065 sec; CPU: 0.136 sec; Peak RSS: 0.011 GB
 ```
 
-This tool is really fast with an all versus all alignment of six *E. coli* genomes. Awesome!
+This tool is really fast with an all versus all alignment of six HIV genomes. Awesome!
 
 #### Graph creation with seqwish
 

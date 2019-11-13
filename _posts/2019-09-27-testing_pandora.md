@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Testing Pandora"
-categories: exercise
+categories: [exercise, psae]
 author: LilithElina
 ---
 
