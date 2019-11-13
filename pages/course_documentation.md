@@ -1,7 +1,6 @@
 ---
 layout: page
 title: "Course Documentation"
-categories: misc
 author: GTPB with Mikko Rautiainen, Erik Garrison, and Miguel Cardoso
 ---
 

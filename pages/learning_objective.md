@@ -90,12 +90,3 @@ Objectives:
 
 - Understand the basic principles behind read alignment, and how these are complicated by aligning reads to a graph.
 - Have the ability to make alignments and interrogate the result to learn basic information like read coverage or putative variants.
-
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).

@@ -1225,11 +1225,3 @@ For more commands, type `vg help`.
 ```
 
 It *is* done!
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).

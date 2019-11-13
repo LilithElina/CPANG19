@@ -155,11 +155,3 @@ vg map -d x -f reads.fq.gz -j | pv -l > /dev/null
 	awk '{if ($3 == "gene") print;}' < $f | sed 's/ID=[^;]*;\(Dbxref=[^;]*;\)\?Name=\([^;]*\);gbkey=[^;]*;\(gene=[^;]*;\)\?gene_biotype=[^;]*;locus_tag=.*/\2/g' | awk '{print $1 "\t" $2 "\t" $9 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8}' > fix.gff; \
 	bedtools getfasta -fi $b.fna -bed fix.gff -name > $b.fa; \
 	done;
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).

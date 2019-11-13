@@ -62,11 +62,3 @@ Augment the novel alleles into the graph to genotype:
 	vg call x.aug.xg -k aln.aug.gam.pack -s rando >rando.vcf
 
 How could you use these variant calls to determine which MHC scaffold(s) are most appropriate for this sample? Since you have trio datasets it may be interesting to look at Mendelian consistency in your approach.
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).

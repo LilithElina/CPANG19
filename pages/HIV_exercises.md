@@ -170,11 +170,3 @@ Now, we can use `vg find` to collect the GAM subset touching the graph:
 ```
 vg find -x z.xg -A node2430.vg >z.node2430.gam
 ```
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).

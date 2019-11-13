@@ -31,12 +31,3 @@ Mikko Rautiainen is a PhD student at the Max Planck Institute for Informatics. H
 His research includes projects such as genome assembly, read error correction and RNA expression quantification. He is the author of [GraphAligner](https://github.com/maickrau/GraphAligner), a tool for aligning third generation sequencing reads such as Pacific Biosciences or Oxford Nanopore reads to sequence graphs.
 
 He graduated from the University of Helsinki with a masters degree in computer science, has worked professionally for three years as a software developer and now studies for a doctorate in bioinformatics at Saarbruecken.
-
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).

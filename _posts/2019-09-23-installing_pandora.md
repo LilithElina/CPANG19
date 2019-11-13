@@ -313,11 +313,3 @@ test_make_prg.py:21: AssertionError
 ```
 
 Except for a deprecation warning, this looks fine.
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).

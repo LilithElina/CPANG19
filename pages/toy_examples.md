@@ -233,11 +233,3 @@ Follow the steps in https://github.com/ekg/yeast-pangenome/blob/master/steps.sh 
 Can we index this graph and map reads against it (e.g. from [YPRP]( https://yjx1217.github.io/Yeast_PacBio_2016/welcome/))?
 
 Use Bandage and odgi to visualize graphs (convert to GFA first).
-
-<br/>
-
------
-
-<br/>
-
-Back to [main page]({{ "/index.html" | relative_url }}).
