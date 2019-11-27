@@ -154,7 +154,7 @@ vg viz -x FivePsae_668831.xg -o ../pics/FivePsae_668831.svg
 
 Apparently yes, since this worked fine as well:
 
-![vg viz version of node 668831 and surroundings]({{ "/playground/day3/pics/FivePsae_668831.png" | relative_url }})  
+![vg viz version of node 668831 and surroundings]({{ "/playground/day3/pics/FivePsae_668831.PNG" | relative_url }})  
 *vg viz version of node 668831 and surroundings*
 
 There is yet another visualisation tool that I have not yet tested, but we're very interested in: [IVG](https://vgteam.github.io/sequenceTubeMap/), which creates sequence tube maps. Sadly, this online tool can only take uploads of up to 5 MB, and apparently it can't deal with graphs that only contain a few extracted nodes, either:
@@ -207,7 +207,7 @@ warning: path "chromosome" not found in index, skipping
 No, it's not working. So here is what I have/want to accomplish using a Python script:
 
 - exchange "chromosome" with an actual path/reference name
-  - maybe change the path names from "refseq|NC_011770|chromosome" to just "NC_011770" using jq first?
+  - maybe change the path names from "`refseq|NC_011770|chromosome`" to just "NC_011770" using jq first?
 - remove duplicate gene/CDS entries
 - filter genes in different references so every gene is only annotated once (or at least most genes are)
 
