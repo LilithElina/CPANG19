@@ -18,3 +18,5 @@ The Jekyll theme used here is Minima:
 
 
 [jekyll-organization]: https://github.com/jekyll
+
+**You can find out more about the author of this webpage in her [pagedown](https://github.com/rstudio/pagedown)-rendered [CV](https://sarah-pohl-cv.netlify.com/).**
