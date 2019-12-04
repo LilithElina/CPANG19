@@ -364,6 +364,8 @@ vg augment FivePsae.vg -i FivePsaeAnnot.gam > FivePsaeAnnot.vg
 vg paths -v FivePsaeAnnot.vg -L
 ```
 
+#### Working with an annotated graph
+
 It worked!  
 Time to look at some genes. The gene list I just got ended with "zwf", "zwf1", and "zwf2", I'm curious enough about that to start with those.
 
@@ -395,7 +397,7 @@ vg view -dp FivePsaeAnnot_1019278.vg | dot -Tpdf -o ../pics/FivePsaeAnnot_101927
 
 [*DOT version of node 1019278 and surroundings (PDF)*]({{ "/playground/day3/pics/FivePsaeAnnot_1019278.pdf" | relative_url }})
 
-Cool, it worked! I already wish I could select which tag will be used as path name, though... Gene names are fine (although it woulb be cool to also have the information in which genome this gene is now officially annotated), but the protein/product names are a bit annoying.
+Cool, it worked! I already wish I could select which tag will be used as path name, though... Gene names are fine (although it would be cool to also have the information in which genome this gene is now officially annotated), but the protein/product names are a bit annoying.
 
 Beside that, we can easily see (in the SVG/PNG version) that this is not the best way to look at specific genes inside the graph - the nodes are sorted by node ID, and the list of IDs already showed that the gene itself is not represented in a linear set of nodes.  
 My chosen example, *zwf1* (the purple path at the bottom), is a gene from PA7 (NC_009656.1, the light blue middle of the reference paths), but does - even in this small example - not touch all nodes that the PA7 genome touches.
@@ -438,7 +440,7 @@ graph path 'GDP-mannose 4,6-dehydratase (pseudogene)' invalid: edge from 1142390
 
 Is it bad that I'm getting used to ignoring these kinds of errors?
 
-I wrote I quick [R script]({{ "/playground/day2/references/path_nodes.R" | relative_url }}) to have a look at the paths in this sub-graph - or more specifically at *zwf1*, *cdhA*, *phzC2* and *pys2*.
+I wrote I quick [R script]({{ "/playground/day3/references/path_nodes.R" | relative_url }}) to have a look at the paths in this sub-graph - or more specifically at *zwf1*, *cdhA*, *phzC2* and *pys2*.
 
 ![Venn diagram of *zwf1*, *cdhA*, *phzC2* and *pys2*]({{ "/playground/day3/pics/venn_zwf1.png" | relative_url }})  
 *Venn diagram of zwf1, cdhA, phzC2 and pys2*
