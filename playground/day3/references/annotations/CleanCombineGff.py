@@ -41,11 +41,20 @@ except:
 # a set which can be printed to check what kind of features the annotations
 # contain. Exclude features such as "region" from the annotations, then 
 # extract feature information like start and stop coordinates.
-# If the current feature is a gene, find the gene name in the attributes
-# string, otherwise use the feature name. Using the defaultdict(dict)
-# method, create dictionary entries for each start_stop feature position
-# consisting again of dictionaries with one entry per feature at that
-# location (to combine gene and CDS features, for example).
+# Take the attribute string and split it at the separating semicolons. Loop
+# over the single attributes and capitalise the first letter of every tag
+# (since that is apparently expected by vg). Save the changed information in
+# a list which can then be joined with semicolons again (to avoid having one)
+# after the last attribute).
+# Find "Name", "Alias", or "Locus" tags in the attributes and save them
+# for reference. Using the defaultdict(dict) method, create dictionary
+# entries for each start_stop feature position consisting again of
+# dictionaries with one entry per feature at that location (to combine
+# gene and CDS features, for example). That key value pair has the gene 
+# name, alias, or locus tag (if applicable, and feature type otherwise) as
+# key, and a modified GFF file line as value. To create this line, remove
+# the first (seqid) and last (attributes) from the original line and add
+# in the changed attributes (with capital letter tags).
 
 with open(infile, "r") as f:
   for line in f:
@@ -65,20 +74,28 @@ with open(infile, "r") as f:
             end = i[4]
             reg = "%s_%s" %(start, end)
             att = i[8]
-            pos_n = att.rfind("name")
-            pos_a = att.rfind("Alias")
-            pos_l = att.rfind("locus")
+            atts = att.split(";")
+            attl = []
+            for a in atts:
+              b = a[:1].upper() + a[1:]
+              attl.append(b)
+            attn = ";".join(attl)
+            pos_n = attn.rfind("Name")
+            pos_a = attn.rfind("Alias")
+            pos_l = attn.rfind("Locus")
             if pos_n != -1:
-              name = att[pos_n+5:].split(";")
+              name = attn[pos_n+5:].split(";")
               gene = name[0]
             elif pos_a != -1:
-              alias = att[pos_a+6:].split(";")
+              alias = attn[pos_a+6:].split(";")
               gene = alias[0]
             elif pos_l != -1:
-              locus = att[pos_l+6:].split(";")
+              locus = attn[pos_l+6:].split(";")
               gene = locus[0]
             else:
               gene = typ
+            i.pop()
+            i.append(attn)
             annots[ref][reg][gene] = "\t".join(i[1:])
 
 ## Create a combined annotation ##

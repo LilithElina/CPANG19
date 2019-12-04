@@ -22,6 +22,14 @@ title: Q&A
 - What is the problem with `vg augment -i`?
 - What's so tricky about augmenting the graph with long reads? Why don't they fit to the references better?
 
+### [Day 3]({{ site.baseurl }}{% post_url 2019-11-13-bacteria_exercises_protocol %})
+
+- Is there another way to visualise a whole genome graph?
+- How can I annotate the graph? Is a specific formatting of GFF files required?
+  - The files just have to strictly follow the specifications, I believe.
+- How does `vg viz` work compared to `vg view (-d)`? Are the nodes sorted differently, and if so, why?
+- How does `vg find -N` work? Why are more nodes included than were on the list?
+
 ## [Pandora]({{ site.baseurl }}{% post_url 2019-09-27-testing_pandora %})
 
 ### General
@@ -47,3 +55,5 @@ title: Q&A
 - What are the sequences in pandora_multisample.vcf_ref.fa?
 - What is the GAPS value in the VCF files?
 - What does it mean when a variant has almost equal forward and reverse coverage?
+- What is the reference in the VCF file?
+

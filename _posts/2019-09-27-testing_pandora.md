@@ -477,3 +477,4 @@ Clicking on nodes in Bandage returns some more details: apparently all of them a
 - What is the GAPS value in the VCF files?
 - What does it mean when a variant has almost equal forward and reverse coverage?
 - Why don't we get the same output when mapping single or multiple samples?
+- What is the reference in the VCF file?

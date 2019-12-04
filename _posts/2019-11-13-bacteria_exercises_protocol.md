@@ -354,6 +354,101 @@ And suddenly I have a loooong list of paths in my annotated graph! I need emojis
 
 I still don't understand why the version without trailing semicolons didn't even get the first feature annotated, but that's a question for another day and for now I just hope it's not a relevant one.
 
+For now, I've adjusted my Python script to correct the formatting of my gff files:
+
+```bash
+python3 CleanCombineGff.py annot_list.tab
+cd ../
+vg annotate -x FivePsae.xg -f annotations/PseudomonasAnnotation.gff > FivePsaeAnnot.gam
+vg augment FivePsae.vg -i FivePsaeAnnot.gam > FivePsaeAnnot.vg
+vg paths -v FivePsaeAnnot.vg -L
+```
+
+It worked!  
+Time to look at some genes. The gene list I just got ended with "zwf", "zwf1", and "zwf2", I'm curious enough about that to start with those.
+
+```bash
+vg index -x FivePsaeAnnot.xg FivePsaeAnnot.vg
+vg paths -x FivePsaeAnnot.xg -X -Q "zwf" > FivePsaeAnnotZwf.gam
+vg view -a FivePsaeAnnotZwf.gam | jq '.path' > FivePsaeAnnotZwf_path.jq
+```
+
+Extracting the paths for those genes (`-Q` in `vg paths` sets the "name prefix", so I can find all three genes) is really quick, and there don't seem to be many nodes involved.
+
+Luckily, we extracted all nodes for certain paths on [day 4]({{ "/course_results/Day4.Script.txt" | relative_url }}) of the course and I have the jq command to do it (I don't know how long it would have taken me to figure it out by myself).
+
+```bash
+vg view -a FivePsaeAnnotZwf.gam | jq '{name: .name, nodes: ([.path.mapping[].position.node_id | tostring] | join(","))}'
+```
+
+*zwf1* has by far the most nodes, and I think I would have to load this into R, or at least sort it somewhere to get an overview, because the node IDs jump around a lot (e.g. "1109132,1019278,688979,1019279,688981,1019280,688983"). I'll just have a look at a random location:
+
+```bash
+vg find -n 1019278 -x FivePsaeAnnot.xg -c 10 | vg view -v - > FivePsaeAnnot_1019278.vg
+vg index -x FivePsaeAnnot_1019278.xg FivePsaeAnnot_1019278.vg
+vg viz -x FivePsaeAnnot_1019278.xg -o ../pics/FivePsaeAnnot_1019278.svg
+vg view -dp FivePsaeAnnot_1019278.vg | dot -Tpdf -o ../pics/FivePsaeAnnot_1019278.pdf
+```
+
+![vg viz version of node 1019278 and surroundings]({{ "/playground/day3/pics/FivePsaeAnnot_1019278.png" | relative_url }})  
+*vg viz version of node 1019278 and surroundings*
+
+[*DOT version of node 1019278 and surroundings (PDF)*]({{ "/playground/day3/pics/FivePsaeAnnot_1019278.pdf" | relative_url }})
+
+Cool, it worked! I already wish I could select which tag will be used as path name, though... Gene names are fine (although it woulb be cool to also have the information in which genome this gene is now officially annotated), but the protein/product names are a bit annoying.
+
+Beside that, we can easily see (in the SVG/PNG version) that this is not the best way to look at specific genes inside the graph - the nodes are sorted by node ID, and the list of IDs already showed that the gene itself is not represented in a linear set of nodes.  
+My chosen example, *zwf1* (the purple path at the bottom), is a gene from PA7 (NC_009656.1, the light blue middle of the reference paths), but does - even in this small example - not touch all nodes that the PA7 genome touches.
+
+The DOT version looks quite different from the SVG version. Here, the node IDs are displayed, which helps in navigating the graph. Together with other genes (*cdhA*, *phzC2*, *pys2*, and QueF), the path for *zwf1* only starts in the middle of the depicted region. This is what I would actually have expected, since the gene starts at node 1109132 and then touches node 1019278, which is the node I selected (and therefore the numeric middle of the displayed region). I wonder how `vg viz` decides what to display and in which order...  
+So, being aware of the different visualisation methods and their quirks is important if you want to visually inspect your graph (or parts of it).
+
+With regards to the actual content of these visualisations - I think I would really have to see the whole gene. Why? Because of all the other genes starting(?) at the same node - none of them are listed as orthologs for *zwf1* on [pseudomonas.com](http://pseudomonas.com/orthologs/list?id=1675236). I have to see the whole gene.
+
+Luckily, `vg find` could actually be able to do that, using the `-N` (node list file) option instead of `-n` (node ID). Since I don't want to create another GAM file for only *zwf1*, I'm going to write all three paths to the file and manually remove the two I'm not interested in right now.
+
+```bash
+vg view -a FivePsaeAnnotZwf.gam | jq '{name: .name, nodes: ([.path.mapping[].position.node_id | tostring] | join(","))}' > zwf_nodes.txt
+vg find -N zwf1_nodes.txt -x FivePsaeAnnot.xg -c 10 | vg view -v - > FivePsaeAnnot_zwf1.vg
+vg index -x FivePsaeAnnot_zwf1.xg FivePsaeAnnot_zwf1.vg
+vg viz -x FivePsaeAnnot_zwf1.xg -o ../pics/FivePsaeAnnot_zwf1.svg
+vg view -dp FivePsaeAnnot_zwf1.vg | dot -Tpdf -o ../pics/FivePsaeAnnot_zwf1.pdf
+```
+
+```
+graph path 'GDP-mannose 4,6-dehydratase (pseudogene)' invalid: edge from 1142390 start to 1120667 end does not exist
+[vg view] warning: graph is invalid!
+```
+
+Again I got a warning when using `vg find` - or, more correctly, `vg view`, as I got the same error when converting to DOT format - to create a sub-graph. I assume that not all nodes for this specific path were included in my list. Creating the DOT format also takes **a lot** of time and cannot be recommended for this (sub-)graph size any more. Creation of an SVG is quick, but opening it in Inkscape is not.
+
+A quick glance using Internet Explorer (I am forced to use this to remotely connect to our server in Braunschweig) shows that there are a lot of paths and a lot of edges between the nodes which presumably make rendering difficult for many programs.
+
+Since it will be hard to analyse this visually/manually, I'll try to look at this programatically. My [nodespergene.R]({{ "/playground/day2/nodespergene.R" | relative_url }}) script from [day 2]({{ site.baseurl }}{% post_url 2019-10-14-HIV_exercises_protocol %}) is a good start for that, using the FivePsaeAnnot_zwf1.vg file that I also used for the visualisation of the sub-graph.
+
+```bash
+vg view FivePsaeAnnot_zwf1.vg -j > FivePsaeAnnot_zwf1.json
+jq '.path' FivePsaeAnnot_zwf1.json > FivePsaeAnnot_zwf1_paths.json
+```
+
+```
+graph path 'GDP-mannose 4,6-dehydratase (pseudogene)' invalid: edge from 1142390 start to 1120667 end does not exist
+[vg view] warning: graph is invalid!
+```
+
+Is it bad that I'm getting used to ignoring these kinds of errors?
+
+I wrote I quick [R script]({{ "/playground/day2/references/path_nodes.R" | relative_url }}) to have a look at the paths in this sub-graph - or more specifically at *zwf1*, *cdhA*, *phzC2* and *pys2*.
+
+![Venn diagram of *zwf1*, *cdhA*, *phzC2* and *pys2*]({{ "/playground/day3/pics/venn_zwf1.png" | relative_url }})  
+*Venn diagram of zwf1, cdhA, phzC2 and pys2*
+
+Each gene has at least one node that distinguishes it from the others. Additionally, *zwf1* has a lot more nodes than the other three genes.
+
+Looking at all paths included in this sub-graph, *zwf1* has by far the most nodes (3329, compared to 647 of the gene with the next most nodes), except for the reference genomes, which all contain more than 4000 nodes here. This is interesting, since I set `vg find` to use the nodes touched by *zwf1*, but obviously more nodes are included...?
+
+
+
 
 
 ## Open questions
@@ -361,3 +456,5 @@ I still don't understand why the version without trailing semicolons didn't even
 - Is there another way to visualise a whole genome graph?
 - How can I annotate the graph? Is a specific formatting of GFF files required?
   - The files just have to strictly follow the specifications, I believe.
+- How does `vg viz` work compared to `vg view (-d)`? Are the nodes sorted differently, and if so, why?
+- How does `vg find -N` work? Why are more nodes included than were on the list?
