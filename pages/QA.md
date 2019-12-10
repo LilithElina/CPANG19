@@ -53,7 +53,11 @@ title: Q&A
 ### `pandora compare`
 
 - What are the sequences in pandora_multisample.vcf_ref.fa?
+  - They are the references used for the variant calling. They are as close to the samples as possible.
 - What is the GAPS value in the VCF files?
+  - They are coverage gaps in the allele.
 - What does it mean when a variant has almost equal forward and reverse coverage?
+  - This is common in standard mapping and can be used to determine if there is a bias in which strand reads come from.
 - What is the reference in the VCF file?
+  - The reference are the sequences in pandora_multisample.vcf_ref.fa.
 
