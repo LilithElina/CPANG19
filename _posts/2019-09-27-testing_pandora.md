@@ -463,7 +463,7 @@ Clicking on nodes in Bandage returns some more details: apparently all of them a
 - Why are single gene graphs so loopy?
 - What does the de novo discovery do, exactly?
 
-## Answers from Zamin
+## Answers from Zamin Iqbal
 
 - The numbers in the PRG file are separators of different parts of the graph.
 - The reason why single graphs after indexing are so loopy is Bandage iself, which has no other possibility of visualising the graphs.
@@ -478,3 +478,15 @@ Clicking on nodes in Bandage returns some more details: apparently all of them a
 - What does it mean when a variant has almost equal forward and reverse coverage?
 - Why don't we get the same output when mapping single or multiple samples?
 - What is the reference in the VCF file?
+
+## Answers from Rachel Colquhoun
+
+Rachel left a long and very helpful [comment](http://disq.us/p/261owm2) below this post answering my questions. **Thank you** very much for that! I'm going to summarise the answers here and copy the whole thing to my [Q&A page]({{ "/pages/QA.html" | relative_url }}). She also clarified the differences between `pandora map` and `pandora compare` on [GitHub](https://github.com/rmcolq/pandora/issues/205#event-2873508882), which led me to check the options of those commands again and apparently they changed since I first wrote this protocol. Is the [Singularity container](https://singularity.lbl.gov/) updating itself?
+
+- The sequences in pandora_multisample.vcf_ref.fa are reference sequences for the variant calling. They are chosen to be as close as possible to the samples that were mapped and for which the VCF is generated.
+- The gaps are coverage gaps in the allele, or better: of kmers covering the allele.
+- Illumina reads usually should have almost equal forward and reverse coverage. I am not sure how I could get confused there.
+- `pandora map` is an option for cases where only one sample is available, and therefor has a different output. Using the `--output-vcf` or `--genotype` options should still lead to a VCF file for this single sample. Gene presence/absense can be judged from the pandora.consensus.fq.gz file (only genes which were covered in the mapping are included).
+
+- There is no plan to allow paired-end mapping input in Pandora. It's possible to concatenate the two read files, but then the reads should probably be "shuffled" (my wording), since Pandora stops reading the input file once a coverage threshold (which can be defined with `--max_covg`) is reached.
+
