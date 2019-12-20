@@ -105,8 +105,9 @@ path 3 refseq|NC_002516.2|chromosome 0.460952 0.48 0.0590476 176 184 23
 path 4 refseq|NC_008463.1|chromosome 0.430809 0.0443864 0.524804 165 17 20
 ```
 
-![pangenome graph based on five references]({{ "/playground/day2/pics/FivePsae.png" | relative_url }})  
+![pangenome graph based on five references]({{ "/playground/day3/pics/FivePsae.png" | relative_url }})  
 *pangenome graph based on five references*
+{: #odgiviz }
 
 There are a lot of edges in this graph, and while `odgi viz` creates a nice overview of this, I think `vg viz` is better if you want to see some details (like which genome is which).
 
@@ -214,10 +215,10 @@ No, it's not working. So here is what I have/want to accomplish using a Python s
 
 #### Preparing the annotation
 
-I decided to keep the path names as they are to save some time. The Python script I wrote (using Python 3) is called [`CleanCombineGff.py`]({{ "/playground/day3/references/annotation/CleanCombineGff.py" | relative_url }}) and resides in the same directory as the annotation files. The script reads a file listing GFF files to clean and combine, ignores features that are not needed, removes duplicate gene/CDS entries and only keeps one gene annotation for all references (based on gene name).
+I decided to keep the path names as they are to save some time. The Python script I wrote (using Python 3) is called [`CleanMergeGff.py`]({{ "/playground/day3/references/annotation/CleanMergeGff.py" | relative_url }}) and resides in the same directory as the annotation files. The script reads a file listing GFF files to clean and combine, ignores features that are not needed, removes duplicate gene/CDS entries and only keeps one gene annotation for all references (based on gene name).
 
 ```bash
-python3 CleanCombineGff.py annot_list.tab
+python3 CleanMergeGff.py annot_list.tab
 ```
 
 ```bash
@@ -357,7 +358,7 @@ I still don't understand why the version without trailing semicolons didn't even
 For now, I've adjusted my Python script to correct the formatting of my gff files:
 
 ```bash
-python3 CleanCombineGff.py annot_list.tab
+python3 CleanMergeGff.py annot_list.tab
 cd ../
 vg annotate -x FivePsae.xg -f annotations/PseudomonasAnnotation.gff > FivePsaeAnnot.gam
 vg augment FivePsae.vg -i FivePsaeAnnot.gam > FivePsaeAnnot.vg
@@ -450,7 +451,187 @@ Each gene has at least one node that distinguishes it from the others. Additiona
 Looking at all paths included in this sub-graph, *zwf1* has by far the most nodes (3329, compared to 647 of the gene with the next most nodes), except for the reference genomes, which all contain more than 4000 nodes here. This is interesting, since I set `vg find` to use the nodes touched by *zwf1*, but obviously more nodes are included...?
 
 
+#### Caveats
 
+As I've already seen when I extracted *zwf1* from the whole graph, the nodes that make up this gene's paths are not in a numerical order. Since the node IDs are so far apart (1109132,1019278,688979,...), I assume that the nodes are created per genome/path, so *zwf1* touches nodes that came with different references. The problem I see here is with my approach to merge the annotations - for example, I have now one annotated version of *oprD*, but I know there are phylogenetic differences in the different strain versions. So how well would I be able to find "everything" that is *oprD* in such an approach?
+
+To test this, and to generally get a "data-driven" feeling for this problem, I'm going to create a mini-annotation with all versions of *oprD* (manually) and annotate the graph with that.
+
+*Note*: *oprD* is not a core gene, and PAK has a number of "OprD family" annotated genes, but none with the gene name *oprD*, so I'll leave that strain out for now.
+
+```bash
+vg annotate -x FivePsae.xg -f annotations/oprD_annotation.gff > FivePsaeoprD.gam
+vg augment FivePsae.vg -i FivePsaeoprD.gam > FivePsaeoprD.vg
+vg index -x FivePsaeoprD.xg FivePsaeoprD.vg
+vg paths -x FivePsaeoprD.xg -X -Q "oprD" > FivePsaeoprD_path.gam
+vg view -a FivePsaeoprD_path.gam | jq '{name: .name, nodes: ([.path.mapping[].position.node_id | tostring] | join(","))}' > oprD_nodes.txt
+```
+
+Great, I have the gam file with only the *oprD* path in it. Wait, with only one path? Well, yes, since the name is always the same, the information is... what? Merged into a single path? Or is the path always being replaced? Let's check!
+
+I replaced the "Name" in the annotation with the "Name"" and the "Alias" (the locus tag) separated by an underscore (so that I'm able to extract all the paths with "oprD" in them), so now I should be able to generate four paths.
+
+```bash
+vg annotate -x FivePsae.xg -f annotations/oprD_annotation2.gff > FivePsaeoprD2.gam
+vg augment FivePsae.vg -i FivePsaeoprD2.gam > FivePsaeoprD2.vg
+vg index -x FivePsaeoprD2.xg FivePsaeoprD2.vg
+vg paths -x FivePsaeoprD2.xg -X -Q "oprD" > FivePsaeoprD2_path.gam
+vg view -a FivePsaeoprD2_path.gam | jq '{name: .name, nodes: ([.path.mapping[].position.node_id | tostring] | join(","))}' > oprD2_nodes.txt
+```
+
+Ok, now I can extract the paths and nodes for another visualisation.
+
+```bash
+vg view FivePsaeoprD.vg -j > FivePsaeoprD.json
+jq '.path' FivePsaeoprD.json > FivePsaeoprD_paths.json
+```
+
+```
+graph path 'oprD' invalid: edge from 1104943 end to 1104948 start does not exist
+graph path 'oprD' invalid: edge from 1104943 end to 1104947 start does not exist
+graph path 'oprD' invalid: edge from 1104941 end to 1104948 start does not exist
+[vg view] warning: graph is invalid!
+```
+
+Ah, here we go again with the warnings. Will they come up with the second version as well? That would be a hint, indicating that maybe the path does get overwritten when the same name appears multiple times (when they don't appear with properly separated paths).
+
+```bash
+vg view FivePsaeoprD2.vg -j > FivePsaeoprD2.json
+jq '.path' FivePsaeoprD2.json > FivePsaeoprD2_paths.json
+```
+
+No error this time. What happens in the other version, then? The node IDs for all versions of *oprD* are saved somewhere, but not in the path information I extracted, so nodes are missing?
+
+```bash
+vg find -N oprD_nodes_clean.txt -x FivePsaeoprD.xg -c 10 | vg view -v - > FivePsaeoprD_nodes.vg
+```
+
+This results in **a lot** of errors. A few excerpts of all the different kinds are listed below:
+
+```
+[vg] warning: node ID 495199 appears multiple times. Skipping.
+[vg] warning: node ID 495200 appears multiple times. Skipping.
+[vg] warning: node ID 931098 appears multiple times. Skipping.
+
+```
+```
+[vg] warning: edge 495199 end <-> 495200 start appears multiple times. Skipping.
+[vg] warning: edge 931097 end <-> 495200 start appears multiple times. Skipping.
+[vg] warning: edge 495200 end <-> 495201 start appears multiple times. Skipping.
+```
+```
+[vg] warning: path oprD rank 39 appears multiple times. Skipping.
+[vg] warning: path oprD rank 40 appears multiple times. Skipping.
+[vg] warning: path oprD rank 42 appears multiple times. Skipping.
+```
+```
+[vg] warning: path refseq|NC_002516.2|chromosome rank 13 appears multiple times. Skipping.
+[vg] warning: path refseq|NC_002516.2|chromosome rank 14 appears multiple times. Skipping.
+[vg] warning: path refseq|NC_002516.2|chromosome rank 15 appears multiple times. Skipping.
+```
+```
+graph path 'oprD' invalid: edge from 1104943 end to 1104948 start does not exist
+graph path 'oprD' invalid: edge from 1104943 end to 1104947 start does not exist
+graph path 'oprD' invalid: edge from 1104941 end to 1104948 start does not exist
+[vg view] warning: graph is invalid!
+```
+
+So the information is not overwritten in the xg index, but maybe in the json file? I'm only guessing here, though.
+
+```bash
+vg index -x FivePsaeoprD_nodes.xg FivePsaeoprD_nodes.vg
+vg viz -x FivePsaeoprD_nodes.xg -o ../pics/FivePsaeoprD_nodes.svg
+vg view -dp FivePsaeoprD_nodes.vg | dot -Tpdf -o ../pics/FivePsaeoprD_nodes.pdf
+```
+
+```
+graph path 'oprD' invalid: edge from 1104943 end to 1104948 start does not exist
+graph path 'oprD' invalid: edge from 1104943 end to 1104947 start does not exist
+graph path 'oprD' invalid: edge from 1104941 end to 1104948 start does not exist
+[vg view] warning: graph is invalid!
+Warning: Could not load "/usr/bin/miniconda3/lib/graphviz/libgvplugin_pango.so.6" - It was found, so perhaps one of its dependents was not.  Try ldd.
+Warning: Could not load "/usr/bin/miniconda3/lib/graphviz/libgvplugin_pango.so.6" - It was found, so perhaps one of its dependents was not.  Try ldd.
+Format: "pdf" not recognized. Use one of: canon cmap cmapx cmapx_np dot dot_json eps fig gv imap imap_np ismap json json0 mp pdf pic plain plain-ext png pov ps ps2 svg svgz tk vdx vml vmlz xdot xdot1.2 xdot1.4 xdot_json
+```
+
+Again the invalid paths come up here, and apparently we now have problems with GraphViz so I can't use the dot format. I'll try to resolve this after creating the same sub-graph for all four paths of *oprD*.
+
+```bash
+vg find -N oprD2_nodes_unique.txt -x FivePsaeoprD2.xg -c 10 | vg view -v - > FivePsaeoprD2_nodes.vg
+vg index -x FivePsaeoprD2_nodes.xg FivePsaeoprD2_nodes.vg
+vg viz -x FivePsaeoprD2_nodes.xg -o ../pics/FivePsaeoprD2_nodes.svg
+```
+
+This ran without any error messages, so I now have the svg files for both versions of *oprD* (one path and four).
+
+![`vg viz` representation of a sub-graph with a merged *oprD* path]({{ "/playground/day3/pics/FivePsaeoprD_nodes.png" | relative_url }})  
+*`vg viz` representation of a sub-graph with a merged oprD path*
+
+![`vg viz` representation of a sub-graph with four *oprD* paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes.png" | relative_url }})  
+*`vg viz` representation of a sub-graph with four oprD paths*
+
+This graph representation nicely shows that nodes are covered multiple times by the merged *oprD* path. It's a bit difficult to directly compare it to the graph with the four *oprD* paths, since the order of the nodes is different, but I think it's safe to presume that the number of repeats for a node correlates to the number of actual paths going through it in the second graph.
+
+I also used the [Sequence Tube Map](https://vgteam.github.io/sequenceTubeMap/) online tool to visualise my sub-graphs in a different format. Here, the nodes are in the same order, but the number of repetition per node is not shown.
+
+![IVG representation of a sub-graph with a merged *oprD* path]({{ "/playground/day3/pics/FivePsaeoprD_nodes_IVG.png" | relative_url }})  
+*IVG representation of a sub-graph with a merged oprD path*
+
+![IVG representation of a sub-graph with four *oprD* paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes_IVG.png" | relative_url }})  
+*IVG representation of a sub-graph with four oprD paths*
+
+When scrolling through the graph with only one *oprD* path, it's interesting to see that the path is not following a single reference path, but instead seems to jump from one genome to the next. I assume that (at least in this tool?) part of the information does get overwritten, so if at one position the path should hit multiple nodes, only one is selected (but how?). In these cases, the `vg viz` representation is much clearer - if not all paths hit a node, the number of hits/repetitions for *oprD* goes down as well. Since the genomic position information is missing here, there is no conflict with two nodes being touched simultaneously.
+
+Differences in visual representation aside, my main interest here was to see which nodes are touched by *oprD* and if a merging of reference annotations makes sense or not.  
+It doesn't. If I want to know which "type" of *oprD* I have in my sample, I want to be able to evaluate all known paths the gene can take, so I need to know all nodes that were touched. This means two things:
+
+- I cannot merge the reference annotations, so there will be a lot more paths than I hoped.
+- I have to adjust the annotations again, to avoid duplicate gene names.
+
+What's the problem with duplicate gene names? They would basically lead to what I wanted in the beginning: one path instead of multiple. The merged path of *oprD* contains all nodes from the four separate paths, so I wouldn't loose any information. On the other hand, I'd gain a lot of error messages for duplicates (which I could clean up, of course), and visualisation would be even more tricky. Mostly, though, I like to easily be able to see from which reference the path I'm hitting with an isolate originates (e.g. "is this the PA14 *oprD* or the PAO1 *oprD*?").
+
+#### Annotating everything
+
+Well then, time to annotate everything and see how that works! I'll write a [`CleanCombineGff.py`]({{ "/playground/day3/references/annotation/CleanCombineGff.py" | relative_url }}) script based on my previous annotation merging script for that.
+
+*Side note 1*: A realisation I had while preparing the script for the new annotation is that there are actually a lot of times when the "Name" attribute in my GFF files is empty, which could in theory have led to empty path names and multiple paths being joined into one.
+
+*Side note 2*: There were multiple problems with my annotation files, usually due to semicolons in the attributes where no semicolons should go, so I had to manually edit files in order for the script to run.
+
+```bash
+cd annotations/
+python CleanCombineGff.py annot_list.tab
+cd ..
+vg annotate -x FivePsae.xg -f annotations/PseudomonasAnnotationAll.gff > FivePsaeAnnotAll.gam
+```
+
+```
+Error parsing gtf/gff line 28618: refseq|NC_008463.1|chromosome P
+Error parsing gtf/gff line 28717: refseq|NC_008463.1|chromosome P
+Error parsing gtf/gff line 29480: refseq|NC_008463.1|chromosome P
+```
+
+There were a lot more of these error lines, so apparently I made a mistake in the annotation creation. I don't know how this happened, but apparently I have a lot of lines that end at the "P" shown in the error message, instead of containing a whole annotation line. Huh, that is a strange outcome.  
+I probably should have used `python3` instead of `python` when calling the script, as I got a new error from the script now (because I used "iteritems" instead of "items" at one point). This alone did not resolve the problem, though.  
+Which is no surprise, really, as the problem was in the last part of my code. I either have a string or a list item to write to my output file, and when I treat both as a list time (and index with "[0]", as I did), I will only get the first letter from the string. I changed my list comprehension to get a string from there as well, to avoid this problem. This is one of a few parts of the script I'm not happy with, as it's so specialised to these GFF files, but I can't think of a generalisation right now.
+
+```bash
+cd annotations/
+python3 CleanCombineGff.py annot_list.tab
+cd ..
+vg annotate -x FivePsae.xg -f annotations/PseudomonasAnnotationAll.gff > FivePsaeAnnotAll.gam
+vg augment FivePsae.vg -i FivePsaeAnnotAll.gam > FivePsaeAnnotAll.vg
+vg index -x FivePsaeAnnotAll.xg FivePsaeAnnotAll.vg
+vg paths -v FivePsaeAnnot.vg -L | wc -l
+vg paths -v FivePsaeAnnotAll.vg -L | wc -l
+```
+
+The file annotated with the reduced annotation contains 3497 paths, the new one with all features annotated contains 30578 paths. While this is a lot, the file sizes of the vg graphs are not so different, with 144M and 153M, respectively. At least this annotation should provide me with all information I need to analyse the features of my selected reference genomes and find them in our clinical isolates.
+
+
+### Finding inversions
+
+A question that came up a few times in group discussions about genome graphs was about inversions. In theory, graphs should show even big genomic inversions just fine, but I'm not entirely sure how this works when the basis for the graph is a multiple sequence alignment. The [publication](https://www.nature.com/articles/35023079) of the PAO1 genome describes a large inversion (more than one-quarter of the genome) compared to a previously mapped isolate, and another [publication](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2006-7-10-r90) describes this inversion as being between PA14 and PAO1. It resulted from a homologous recombination event between the rRNAs *rrnA* and *rrnB* and should be visible in the graph. The overview generated with [`odgi viz`](#odgiviz) might already be showing that, but I still find it a little hard to interpret.
 
 
 ## Open questions
@@ -460,3 +641,4 @@ Looking at all paths included in this sub-graph, *zwf1* has by far the most node
   - The files just have to strictly follow the specifications, I believe.
 - How does `vg viz` work compared to `vg view (-d)`? Are the nodes sorted differently, and if so, why?
 - How does `vg find -N` work? Why are more nodes included than were on the list?
+- What exactly happens when multiple paths have the same or no name (i.e. annotation of genes with the same name, or no name)?
