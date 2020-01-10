@@ -26,7 +26,7 @@ title: Q&A
 
 - Is there another way to visualise a whole genome graph?
 - How can I annotate the graph? Is a specific formatting of GFF files required?
-  - The files just have to strictly follow the specifications, I believe.
+  - The files just have to strictly follow the specifications, at least for the "Name" part. All annotations that don't have a "Name" attribute are [added to a single path with no name](https://github.com/vgteam/vg/issues/2550).
 - How does `vg viz` work compared to `vg view (-d)`? Are the nodes sorted differently, and if so, why?
 - How does `vg find -N` work? Why are more nodes included than were on the list?
 
@@ -41,26 +41,28 @@ Answers are mostly from Zamin Iqbal and [Rachel Colquhoun](https://lilithelina.g
 - Why are single gene graphs so loopy?
   - This is due to the way Bandage visualises the graphs, maybe try a different tool.
 - Why don't we get the same output when mapping single or multiple samples?
-  - "There are slightly different output files when running pandora map on a single sample or pandora compare on several. The reason for this is that they are designed to be used in different scenarios. It doesn't really make sense to run pandora map separately on many samples and then "merge" the VCFs because each will be with respect to a different reference by default. However, we may want to know what gene sequences we see when we only have a single sample and that is why we still have pandora map as an option."
+  - "There are slightly different output files when running pandora map on a single sample or pandora compare on several. The reason for this is that they are designed to be used in different scenarios. It doesn't really make sense to run pandora map separately on many samples and then 'merge' the VCFs because each will be with respect to a different reference by default. However, we may want to know what gene sequences we see when we only have a single sample and that is why we still have pandora map as an option."
 
 ### `pandora map`
 
 - Where can I find gene presence/absence information?
-  - ~~There *should* be a matrix file.~~ It can be inferred from the pandora.consensus.fq.gz file, since that contains all mosaic sequences ffor genes that were found in the sample.
+  - ~~There *should* be a matrix file.~~ It can be inferred from the pandora.consensus.fq.gz file, since that contains all mosaic sequences for genes that were found in the sample.
 - Suggestion for fasta reference for VCF creation when using panX data?
   - That is not necessary to create a VCF file, you just need to use the `--output_vcf` or `--genotype` options (additional explanation [here](https://github.com/rmcolq/pandora/issues/205)).
 - What does the de novo discovery do, exactly?
   - The de novo discovery tool can be used to augment/complement the original graph.
 - What are the graphs created after mapping?
+- What are the warnings "Input vcf_ref path was too short to be the ref" and "Could not find reference sequence in the PRG so using the consensus path" about?
+  - "[These warnings can safely be ignored](https://github.com/rmcolq/pandora/issues/206). They are being triggered by the default user behaviour which is not to provide a VCF reference. The first of these is already fixed in a pull request I'm waiting to merge in. We will update the code to stop the second being triggered also (or at least call it something other than warning)."
 
 ### `pandora compare`
 
 - What are the sequences in pandora_multisample.vcf_ref.fa?
-  - "The sequences in the pandora_multisample.vcf_ref.fa are the "reference sequence" which the VCF is with respect to. Because the reference contains multiple alleles, we have to pick one of them to be the equivalent of the "wild type". These reference sequences are chosen as paths through the graph, aiming to minimize the distance between each sample and this "reference" (so that we get more SNPs in the VCF and fewer long alleles called)"
+  - "The sequences in the pandora_multisample.vcf_ref.fa are the 'reference sequence' which the VCF is with respect to. Because the reference contains multiple alleles, we have to pick one of them to be the equivalent of the 'wild type'. These reference sequences are chosen as paths through the graph, aiming to minimize the distance between each sample and this 'reference' (so that we get more SNPs in the VCF and fewer long alleles called)"
 - What is the GAPS value in the VCF files?
   - "When we calculate the coverage on an allele, we are actually calculating the coverage on kmers which cover the allele. Similarly, we can look at the fraction of these kmers which have no coverage. This is represented by the GAPS field. If an allele is the true allele, not only do we expect to see (relatively) consistent/high coverage over the allele, we also do not expect to see many kmers with no coverage overlapping that allele."
 - What does it mean when a variant has almost equal forward and reverse coverage?
-  - " For Illumina data, most variants should have almost equal forward and reverse coverage because we expect on average half of reads to have been generated in the forward direction along the genome, and half in the reverse. For Nanopore data, sequencing biases make it more likely to have a skew between the coverage each way."
+  - "For Illumina data, most variants should have almost equal forward and reverse coverage because we expect on average half of reads to have been generated in the forward direction along the genome, and half in the reverse. For Nanopore data, sequencing biases make it more likely to have a skew between the coverage each way."
 - What is the reference in the VCF file?
   - The reference are the sequences in pandora_multisample.vcf_ref.fa.
 
