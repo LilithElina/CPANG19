@@ -5,7 +5,7 @@ categories: [exercise, psae]
 author: LilithElina
 ---
 
-Pandora needs pangenome graphs (PanRG) as input in order to work. These should be generated with [make_prg](https://github.com/rmcolq/make_prg), and the usage example on [GitHub](https://github.com/rmcolq/pandora) suggests to use multiple sequence alignments (MSA) from [panX](http://pangenome.de/) as input for that. Great, this looks like something Sara would like!
+Pandora needs pangenome graphs (PanRG) as input in order to work. These should be generated with [make_prg](https://github.com/rmcolq/make_prg), and the usage example on [GitHub](https://github.com/rmcolq/pandora) suggests to use multiple sequence alignments (MSA) from [panX](http://pangenome.de/) as input for that. Great, this looks like something my colleague Sara would like!
 
 * Do not remove this line (it will not be displayed)
 {:toc}
@@ -82,7 +82,7 @@ cd panX_paeru/core_gene_alignments/
 pandora index pangenome_PRG.fa
 ```
 
-The indexing ran for around 20 minutes (without Nextflow, there's no nice duration information). It generates lots of status output about sketching the graphs for the MSA files, and generates a 49 MB index file and a directory (kmer_prgs/01/) with [GFA](https://github.com/GFA-spec/GFA-spec) format files for the single graphs. The GFA files are awesome, because now I do have a chance to visualise the graphs, at least one gene at a time! To do that, I will have to install some more tools first, though, and [I will do that later](#vis), focusing on the read mapping first.
+The indexing ran for around 20 minutes (without Nextflow, there's no nice duration information). It generates lots of status output about sketching the graphs for the MSA files, and generates a 49 MB index file and a directory (kmer_prgs/01/) with [GFA](https://github.com/GFA-spec/GFA-spec) format files for the single graphs. The GFA files are awesome, because now I do have a chance to visualise the graphs, at least one gene at a time! To do that, I will have to install some more tools first, though, and [I will do that later]({{ site.baseurl }}{% post_url 2019-09-28-visualising_pandora %}), focusing on the read mapping first.
 
 ### Mapping a single sample
 
@@ -261,13 +261,140 @@ Sooner or later I will need help interpreting these results...
 
 I had a chat with Zamin, but without my data at hand. He says there should be a matrix file with gene presence and absence, but all I have are the coverage and the probability files, which I am quite sure are something else. Maybe this only works with multiple samples?
 
+#### Gene presence and absence
+
+As it has now turned out that `pandora map` does indeed not return a gene presence/absence matrix, I'll use a [different way](https://github.com/rmcolq/pandora/issues/205) to figure out which genes were present in my sample. Mosaic sequences for found genes are all collected in pandora.consensus.fq.gz, so gene presence/absence can be inferred from there.
+
+```bash
+exit
+cd panX_paeru/core_gene_alignments/CH3797_R1
+gunzip pandora.consensus.fq.gz
+head pandora.consensus.fq
+```
+
+```
+@GC00002025 log P(data|sequence)=-3.329215
+TTGAGGTTACGTAGCCCCTACTGGCTGTTCGTGGTGCTGATCCTGGCGCTGGCGGGCCTGCAATATCGCCTGTGGGTCGGCGATGGCAGCCTGGCGCAGGTGCGCGACCTGCAGAAGCAGATCGCCGACCAGCATGGCGAGAACGAGCGCCTGCTGGAGCGCAACCGGATTCTCGAAGCCGAAGTCGCCGAGCTGAAGAAAGGCACCGAGACCGTCGAGGAGCGTGCGCGGCACGAGCTCGGCATGGTCAAGGACGGCGAAACCCTCTACCAGCTCGCCAAG
++
+!!----------------------............//////////////2222222222222221111114445666666666666;;;;;;;;;;;;;;;:::;;;;;;;;;;;;;;;::::::::::::::::::::;;;;;;;;;;;;;;;8888888888888888888888885555555555555555555555554445555555555555553333333333333333333333333333333332222222222222222211111111111
+@GC00001504 log P(data|sequence)=-2.890311
+ATGCCAGCCGTCAAAGTAAAAGAGAACGAACCCTTCGACGTAGCCCTGCGTCGTTTCAAGCGCTCCTGCGAAAAAGCAGGTGTACTGGCTGAAGTTCGCAGCCGCGAGTTCTACGAGAAGCCCACTGCCGAGCGCAAGCGCAAGGCCGCTGCCGCAGTGAAGCGCCACGCGAAGAAAGTACAGCGCGAACAGCGCCGTCGCGAGCGCCTGTAC
++
+!!!888888888888888666668888888888:::::::::::::::::::::::9999999999999999999999::::;;;;;;;;;;;;;;;;;;;;;99999999999999:::::::::::::::99999999999988887777777777777666666655544444433333333333222220000000!!!!!!!!!!!!!
+@GC00000511_1 log P(data|sequence)=-6.203405
+ATGAAAGCGTTTCTCGGGCTGGGCAAGCTCGTGACCCTGGTGTTCTGGGGCGCGGTGCTGGTCAATCTGCTGCATCCGTTCGCCTATCCGCTGAACTGGCTGTTGTCGATAGCCGGCGGCCTGATCCTGTTGATCCACCTGATCGAGATTCTCGTCCTCGGACGACGCCTGAAAGCGCGCGCGCATCCCTGGCTGGATCGTCTCCAGGTCCTGCTGTTCGGGGTCTTCCACATGCTTGCGTTGCCGGCGCTGAGCCCGGCCAGCGAGTTGCCGCAGGACAAGGAGGACGATCATGCG
+```
+
+If I only want to look at gene presence/absence, it should be enough to take the lines starting with an "@", since only found genes are included here.
+
+```bash
+grep "^@GC" pandora.consensus.fq | sed 's/^.//' > found_genes.txt
+```
+
+This command results in a list of 2218 gene IDs (out of 2266 core genes). I included the "GC" to remove one quality string that also started with an "@", since all gene IDs are starting with "GC". I also used `sed` to remove the "@" to be able to compare this list easily with the whole gene list (core_genes_index.tsv).
+
+Well, it's nice that it's this easy to get a list of found genes for the single sample mapping after all. Is it true that 48 "core" genes are missing in this clinical isolate, though? Let's find out which genes these are.
+
+```bash
+awk 'NR==FNR { a[$1]=$0; next } { if( !($1 in a) ) print $0 }' found_genes.txt /data3/genome_graphs/panX_paeru/core_genes_index.tsv > missing_genes.tsv
+```
+
+I selected a few genes from this list at random to check their identity, hoping to figure out why they were not found in this mapping. Since the most promising data I have for comparison are results from a mapping to PA14, I looked in the alignment files for relevant locus tags. Sadly, the files only contain custom IDs, so I had to take the ID from the alignment file and enter that in the [panX database](http://pangenome.de/Pseudomonas_aeruginosa). The problem then is that the database only lists the annotation and gene name, if present, not the locus tag, and for some reason this annotation is not found in my annotation file. If I wanted to find these 48 genes, I think my best bet would be to BLAST the sequences to find their identity in PA14 and then compare to our mapping results. Since this question is not of major importance right now, I'm not going to invest any more time in that, though. Maybe at a later time point, in case we decide to use Pandora for our research.
+
+#### Generating a VCF file
+
+There are two arguments to `pandora map` that will generate VCF files. One is `--output-vcf` which will output the mosaic sequences in VCF format, and `--genotype` will additionally genotype the sample and add coverage information as well. Since this is on top of the generation of the first VCF file, I think I'll got with that option.
+
+```bash
+cd /data3/genome_graphs/
+singularity shell pandora_pandora.sif
+cd panX_paeru/core_gene_alignments/
+pandora map -p pangenome_PRG.fa -r ../../sample_data/CH3797_R1.fastq.gz -o CH3797_R1_genotype --genotype
+exit
+```
+
+```
+START: Wed Jan  8 09:28:41 2020
+
+Using parameters:
+        prgfile         pangenome_PRG.fa
+        readfile        ../../sample_data/CH3797_R1.fastq.gz
+        outdir  CH3797_R1_genotype
+        w               14
+        k               15
+        max_diff        250
+        error_rate      0.11
+        threads 1
+        output_kg       0
+        output_vcf      1
+        vcf_refs
+        output_comparison_paths 0
+        output_covgs    0
+        output_mapped_read_fa   0
+        illumina        0
+        clean   0
+        bin     0
+        max_covg        300
+        genotype        1
+        snps_only       0
+        discover        0
+        denovo_kmer_size
+
+        log_level       info
+
+Wed Jan  8 09:28:41 2020 Loading Index and LocalPRGs from file
+Wed Jan  8 09:28:48 2020 Constructing pangenome::Graph from read file (this will take a while)
+[2020-01-08 09:29:21.996411] [0x00007fd741ceff80] [info]    100000 reads processed...
+[2020-01-08 09:29:55.678986] [0x00007fd741ceff80] [info]    200000 reads processed...
+[2020-01-08 09:30:29.391167] [0x00007fd741ceff80] [info]    300000 reads processed...
+[2020-01-08 09:31:02.825737] [0x00007fd741ceff80] [info]    400000 reads processed...
+[2020-01-08 09:31:36.682227] [0x00007fd741ceff80] [info]    500000 reads processed...
+[2020-01-08 09:32:10.410496] [0x00007fd741ceff80] [info]    600000 reads processed...
+[2020-01-08 09:32:43.885851] [0x00007fd741ceff80] [info]    700000 reads processed...
+[2020-01-08 09:32:55.391406] [0x00007fd741ceff80] [info]    Processed 734237 reads
+Wed Jan  8 09:32:55 2020 Writing pangenome::Graph to file CH3797_R1_genotype/pandora.pangraph.gfa
+Wed Jan  8 09:32:56 2020 Update LocalPRGs with hits
+Wed Jan  8 09:32:56 2020 Estimate parameters for kmer graph model
+[2020-01-08 09:32:56.993133] [0x00007fd741ceff80] [info]    Collect kmer coverage distribution
+[2020-01-08 09:32:57.001545] [0x00007fd741ceff80] [info]    Writing kmer coverage distribution to CH3797_R1_genotype/kmer_covgs.txt
+mean, var: 28.4014 39.1444
+0 108 43
+[2020-01-08 09:32:57.003020] [0x00007fd741ceff80] [info]    Collect kmer probability distribution
+[2020-01-08 09:32:57.895605] [0x00007fd741ceff80] [info]    Writing kmer probability distribution to CH3797_R1_genotype/kmer_probs.txt
+[2020-01-08 09:32:57.895993] [0x00007fd741ceff80] [info]    Estimated threshold for true kmers is -23
+Wed Jan  8 09:32:57 2020 Find PRG paths and write to files:
+[2020-01-08 09:32:57.905378] [0x00007fd741ceff80] [warning] Input vcf_ref path was too short to be the ref for PRG GC00002025
+[2020-01-08 09:32:57.905389] [0x00007fd741ceff80] [warning] Could not find reference sequence for GC00002025 in the PRG so using the consensus path
+[2020-01-08 09:32:57.906422] [0x00007fd741ceff80] [warning] Input vcf_ref path was too short to be the ref for PRG GC00001504
+
+[...]
+
+[2020-01-08 09:36:48.102113] [0x00007fd741ceff80] [info]    Wed Jan  8 09:36:48 2020 Genotype VCF
+[2020-01-08 09:36:48.512466] [0x00007fd741ceff80] [info]    Wed Jan  8 09:36:48 2020 Make all genotypes compatible
+
+[...]
+
+FINISH: Wed Jan  8 09:36:49 2020
+```
+
+This run took less than ten minutes and generated a lot of warnings (could not find reference in PRG and ref path too short), as well as a lot of information about the two VCF files produced. These two files are now located in CH3797_R1_genotype as *pandora_consensus.vcf* and *pandora_genotyped.vcf*, together with the four files that were also generated during the previous mappings (*kmer_covg.txt*, *kmer_probs.txt*, *pandora.consensus.fq.gz*, and *pandora.pangraph.gfa*). The consensus VCF file is a little smaller than the genotyped file, but they contain the same number of lines (104596). Many of these lines seem to actually be part of the header listing all the contigs (i.e. genes)... As expected, the variants seem to be identical, and it's only the format and sample columns that are different, with likelihood and genotype confidence included in the genotyped VCF.
+
+Example in gene GC00002553:
+
+Position | REF | ALT | GT | MEAN_FWD_COVG | MEAN_REV_COVG | MED_FWD_COVG | MED_REV_COVG | SUM_FWD_COVG | SUM_REV_COVG | GAPS | LIKELIHOOD | GT_CONF
+1539 | G | C | 0 | 17,9 | 15,7 | 17,9 | 16,7 | 52,18 | 47,15 | 0,0.5 | -76.6101,-166.722 | 90.1119
+
+At this position, more reads support the reference allele and the likelihood is higher for the reference (I don't know how these numbers are generated, though), but both versions are covered. The genotype confidence is therefore "only" 90%.
+
+Well then, back to the warnings as the last thing to look at here...  
+The first one is "Input vcf_ref path was too short to be the ref for PRG GC00002025", followed by "Could not find reference sequence for GC00002025 in the PRG so using the consensus path". So the "vcf_ref path", whatever that is, could not be found in the pangenome graph for this gene, so in the end the consensus path was used. The first sequence in the original alignment file is only 282 nucleotides long, as is the mosaic sequence in pandora.consensus.fq. So what's the difference?
 
 ### Comparing several samples
 
-To make the comparison of multiple samples interesting, I decided to work with the 27 isolates from Jelena and Janne's [new paper](https://doi.org/10.3390/cells8101129). That means I also have a genetic distance tree based on 1021 genes of which proteins could be quantified at my disposal as well:
+To make the comparison of multiple samples interesting, I decided to work with the 27 isolates from one of our group's [latest papers](https://doi.org/10.3390/cells8101129). That means I also have a genetic distance tree based on 1021 genes of which proteins could be quantified at my disposal as well:
 
 <img src="{{ "/playground/Pandora/27_isolates_protein_tree.png" | relative_url}}" width="150" />  
-*Hierarchical clustering by genetic distance based on the 1021 genes for which the encoded proteins were quantified in this study. PAO1-like strains predominate and are colored in blue-, violet-, and green colors, respectively. PA14-like strains are colored in yellow/orange or red (Erdmann et al., 2019).*
+*Hierarchical clustering by genetic distance based on the 1021 genes for which the encoded proteins were quantified in this study. PAO1-like strains predominate and are colored in blue-, violet-, and green colors, respectively. PA14-like strains are colored in yellow/orange or red ([Erdmann et al., 2019]((https://doi.org/10.3390/cells8101129))).*
 
 To use these isolates, I copied the FASTQ files with the first reads in the pairs to the same sample_data directory where the other single FASTQ file was already located. Then I created a read index with sample ID and FASTQ file name (tab separated) per line as per the Pandora instructions. Now I can start the mapping:
 
@@ -401,53 +528,32 @@ isolate | GT | MEAN_FWD_COVG | MEAN_REV_COVG | MED_FWD_COVG | MED_REV_COVG | SUM
 CH2682  | 0  | 10,4          | 11,5          | 14,0         | 15,0         | 42,14              | 46,15        | 0.25,0.666667
 F1864   | 1  | 14,59         | 19,77         | 0,59         | 0,77         | 59,177              | 79,233       | 0.75,0
 
-Isolate CH2682 has the wildtype genotype, but does show a little coverage of the alternative allele (e.g. overall forward coverage 42 reads for the wildtype, 14 for the alternative, and 46 and 15 on the reverse strand). F1864 on the other hand has a strong preference for the alternative allele (59 to 177 forward and 79 to 233 reverse reads). Is it common to have almost equal forward and reverse coverage?
+Isolate CH2682 has the wildtype genotype, but does show a little coverage of the alternative allele (e.g. overall forward coverage 42 reads for the wildtype, 14 for the alternative, and 46 and 15 on the reverse strand). F1864 on the other hand has a strong preference for the alternative allele (59 to 177 forward and 79 to 233 reverse reads). Is it common to have almost equal forward and reverse coverage? - Of course it is, I just was too used to strand-specific RNA-seq data and got confused.
 
-### Core SNP tree
+### Core gene tree
 
-
-
-## Visualising graphs
-{: #vis }
-
-### Core genes
-
-#### Single genes in Bandage
-
-[Bandage](http://rrwick.github.io/Bandage/), a nice graph visualisation tool, has executables also for Windows, so I'm using this to visualise single gene graphs while the mapping is running.
-
-I randomly took the first graph file - GC00000001_11_na_aln.fa.k15.w14.gfa - to download it to my PC and load it into Bandage. The graph inside is very loopy for a single gene - I think I have to compare this to the multiple sequence alignment.
-
-![*GC00000001_11 in Bandage - overview*]({{ "/playground/Pandora/GC00000001_11_Bandage_overview.PNG" | relative_url }})  
-*Overview of the GC00000001_11 graph in Bandage*
-
-![*GC00000001_11 in Bandage - detail*]({{ "/playground/Pandora/GC00000001_11_Bandage_detail.PNG" | relative_url }})  
-*Detail of the GC00000001_11 graph in Bandage*
+In order to generate a phylogenetic tree based on the 2266 core genes, I think I will extract the consensus sequences from the pandora.consensus.fq files for each isolate and build a tree from those using our standard approach. Since these sequences should be the mosaic sequences for each individual sample, they should give a good approximation. Depending on how complex I'm going to make the extraction, there's a good chance I'm going to have different numbers of genes in the different samples, and a different order as well, but this shouldn't be a problem for the [k-mer approach](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0087991#s2).
 
 ```bash
-cd /data3/genome_graphs/panX_paeru/core_gene_alignments
-gunzip GC00000001_11_na_aln.fa.gz
+cd /data3/genome_graphs/panX_paeru/core_gene_alignments/27_isolates/CH2682/
+awk -v ORS="NNANN" 'printf (NR%4==2)' pandora.consensus.fq > CH2682.txt
+./get_sequences.sh
 ```
 
-I opened the fasta in [UGENE](http://ugene.net/) as a multiple sequence alignment and the sequences look pretty similar to me. They don't all have the same length, but otherwise...
+Based on the `awk` command above I wrote a shell script ([get_sequences.sh]({{ "/playground/Pandora/get_sequences.sh" | relative_url}})) that creates a multi-fasta file with one sequence per isolate. These sequences contain all gene sequences from pandora.consensus.fq per isolate, joined with "NNANN" (because we usually do it like that). The resulting file (27_isolates.merged.fasta) I can now feed into the scripts we use to calculate phylogenetic distance based on k-mers.
 
-![*Similarity of GC00000001_11 sequences in UGENE*]({{ "/playground/Pandora/GC00000001_11_Ugene_consensus.PNG" | relative_url }})  
-*Similarity of the GC00000001_11 sequences in UGENE*
+```bash
+python /data3/scripts/kmerdist_spo12.py -m 27_isolates.merged.fasta -n 27_isolates.tdb -l 27_isolates.log -o 27_isolates.dist &
+python /data3/scripts/distmatrix.py -f 27_isolates.dist -o 27_isolates.dst -d 4 & 
+```
 
-I think I will have to install [odgi](https://github.com/vgteam/odgi) or get vg to work to see sequence details and figure out where the loops come from.
+<img src="{{ "/playground/Pandora/27_isolates_core_tree.png" | relative_url}}" width="150" />  
+*Phylogenetic tree based on mosaic sequences generated by mapping sequencing reads of the samples to the core gene pangenome graph. PAO1-like isolates are coloured in dark gray, PA14-like isolates are coloured in black.*
 
-#### Core gene mapping results in Bandage
+I [created]({ "/playground/Pandora/phylo_tree.R" | relative_url}}) a neighbour joining tree using [ape](https://www.rdocumentation.org/packages/ape/versions/5.3) and visualised this with [ggtree](https://yulab-smu.github.io/treedata-book/index.html). The resulting tree is different from the one generated based on protein data, but at least the PAO1- and PA14-like isolates cluster together as expected. I did not expect the PA14-like isolates to be a sub-cluster of one of the PAO1-like clusters, though.
 
-The graph that is created by mapping reads to the pangenome (with the standard settings) is not too big, so I think I can download and visualise that as well.
+I also realised only now that one isolate - F2020 - is missing from the tree and, as it turns out, also from the mapping results. It was the last isolate on my list, I don't know why it wasn't included in the mapping. Since I didn't pay attention to the mapping output, and no automatic log was created, I guess I have to start the mapping again to figure out what happened.
 
-![*pandora.pangraph.gfa in Bandage - overview of CH3797*]({{ "/playground/Pandora/CH3797_overview.PNG" | relative_url }})  
-*pandora.pangraph.gfa in Bandage - overview of CH3797*
-
-![*pandora.pangraph.gfa in Bandage - detail of CH3797*]({{ "/playground/Pandora/CH3797_detail.PNG" | relative_url }})  
-*pandora.pangraph.gfa in Bandage - detail of CH3797*
-
-It looks like some of the core genes were combined, either to that huge mess or to smaller, more or less linear, groups. But this is a mapping result, so I'm not sure how one would interpret this.  
-Clicking on nodes in Bandage returns some more details: apparently all of them are only 1 bp long, but their IDs look like those of the core genes I used when creating the "pangenome".
 
 <br/>
 
@@ -460,13 +566,11 @@ Clicking on nodes in Bandage returns some more details: apparently all of them a
 - Where can I find gene presence/absence information?
 - Suggestion for fasta reference for VCF creation when using panX data?
 - What are the graphs created after mapping?
-- Why are single gene graphs so loopy?
 - What does the de novo discovery do, exactly?
 
 ## Answers from Zamin Iqbal
 
 - The numbers in the PRG file are separators of different parts of the graph.
-- The reason why single graphs after indexing are so loopy is Bandage iself, which has no other possibility of visualising the graphs.
 - Gene presence and absence should be found in a matrix file.
 - A reference for variant calling is not needed. It happens automatically when using `pandora compare`.
 - The de novo discovery can be used to complement the graph.
@@ -486,7 +590,11 @@ Rachel left a long and very helpful [comment](http://disq.us/p/261owm2) below th
 - The sequences in pandora_multisample.vcf_ref.fa are reference sequences for the variant calling. They are chosen to be as close as possible to the samples that were mapped and for which the VCF is generated.
 - The gaps are coverage gaps in the allele, or better: of kmers covering the allele.
 - Illumina reads usually should have almost equal forward and reverse coverage. I am not sure how I could get confused there.
-- `pandora map` is an option for cases where only one sample is available, and therefor has a different output. Using the `--output-vcf` or `--genotype` options should still lead to a VCF file for this single sample. Gene presence/absense can be judged from the pandora.consensus.fq.gz file (only genes which were covered in the mapping are included).
+- `pandora map` is an option for cases where only one sample is available, and therefor has a different output. Using the `--output-vcf` or `--genotype` options should still lead to a VCF file for this single sample. Gene presence/absence can be judged from the pandora.consensus.fq.gz file (only genes which were covered in the mapping are included).
 
 - There is no plan to allow paired-end mapping input in Pandora. It's possible to concatenate the two read files, but then the reads should probably be "shuffled" (my wording), since Pandora stops reading the input file once a coverage threshold (which can be defined with `--max_covg`) is reached.
 
+# Still more questions
+
+- What are the warnings "Input vcf_ref path was too short to be the ref" and "Could not find reference sequence in the PRG so using the consensus path" about?
+  - [The warnings can be ignored](https://github.com/rmcolq/pandora/issues/206). The first one is already being removed, and the second will be removed or changed as well.
