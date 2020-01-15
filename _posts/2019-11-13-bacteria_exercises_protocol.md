@@ -427,7 +427,7 @@ Again I got a warning when using `vg find` - or, more correctly, `vg view`, as I
 
 A quick glance using Internet Explorer (I am forced to use this to remotely connect to our server in Braunschweig) shows that there are a lot of paths and a lot of edges between the nodes which presumably make rendering difficult for many programs.
 
-Since it will be hard to analyse this visually/manually, I'll try to look at this programatically. My [nodespergene.R]({{ "/playground/day2/nodespergene.R" | relative_url }}) script from [day 2]({{ site.baseurl }}{% post_url 2019-10-14-HIV_exercises_protocol %}) is a good start for that, using the FivePsaeAnnot_zwf1.vg file that I also used for the visualisation of the sub-graph.
+Since it will be hard to analyse this visually/manually, I'll try to look at this programmatically. My [nodespergene.R]({{ "/playground/day2/nodespergene.R" | relative_url }}) script from [day 2]({{ site.baseurl }}{% post_url 2019-10-14-HIV_exercises_protocol %}) is a good start for that, using the FivePsaeAnnot_zwf1.vg file that I also used for the visualisation of the sub-graph.
 
 ```bash
 vg view FivePsaeAnnot_zwf1.vg -j > FivePsaeAnnot_zwf1.json
@@ -479,7 +479,7 @@ vg paths -x FivePsaeoprD2.xg -X -Q "oprD" > FivePsaeoprD2_path.gam
 vg view -a FivePsaeoprD2_path.gam | jq '{name: .name, nodes: ([.path.mapping[].position.node_id | tostring] | join(","))}' > oprD2_nodes.txt
 ```
 
-Ok, now I can extract the paths and nodes for another visualisation.
+OK, now I can extract the paths and nodes for another visualisation.
 
 ```bash
 vg view FivePsaeoprD.vg -j > FivePsaeoprD.json
@@ -564,21 +564,21 @@ vg viz -x FivePsaeoprD2_nodes.xg -o ../pics/FivePsaeoprD2_nodes.svg
 
 This ran without any error messages, so I now have the svg files for both versions of *oprD* (one path and four).
 
-![`vg viz` representation of a sub-graph with a merged *oprD* path]({{ "/playground/day3/pics/FivePsaeoprD_nodes.png" | relative_url }})  
-*`vg viz` representation of a sub-graph with a merged oprD path*
+![Start of vg viz representation of a sub-graph with a merged oprD path]({{ "/playground/day3/pics/FivePsaeoprD_nodes.PNG" | relative_url }})  
+*Start of `vg viz` representation of a sub-graph with a merged oprD path*
 
-![`vg viz` representation of a sub-graph with four *oprD* paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes.png" | relative_url }})  
+![Start of vg viz representation of a sub-graph with four oprD paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes.PNG" | relative_url }})  
 *`vg viz` representation of a sub-graph with four oprD paths*
 
 This graph representation nicely shows that nodes are covered multiple times by the merged *oprD* path. It's a bit difficult to directly compare it to the graph with the four *oprD* paths, since the order of the nodes is different, but I think it's safe to presume that the number of repeats for a node correlates to the number of actual paths going through it in the second graph.
 
 I also used the [Sequence Tube Map](https://vgteam.github.io/sequenceTubeMap/) online tool to visualise my sub-graphs in a different format. Here, the nodes are in the same order, but the number of repetition per node is not shown.
 
-![IVG representation of a sub-graph with a merged *oprD* path]({{ "/playground/day3/pics/FivePsaeoprD_nodes_IVG.png" | relative_url }})  
-*IVG representation of a sub-graph with a merged oprD path*
+![Start of IVG representation of a sub-graph with a merged oprD path]({{ "/playground/day3/pics/FivePsaeoprD_nodes_IVG.PNG" | relative_url }})  
+*Start of IVG representation of a sub-graph with a merged oprD path*
 
-![IVG representation of a sub-graph with four *oprD* paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes_IVG.png" | relative_url }})  
-*IVG representation of a sub-graph with four oprD paths*
+![Start of IVG representation of a sub-graph with four oprD paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes_IVG.PNG" | relative_url }})  
+*Start of IVG representation of a sub-graph with four oprD paths*
 
 When scrolling through the graph with only one *oprD* path, it's interesting to see that the path is not following a single reference path, but instead seems to jump from one genome to the next. I assume that (at least in this tool?) part of the information does get overwritten, so if at one position the path should hit multiple nodes, only one is selected (but how?). In these cases, the `vg viz` representation is much clearer - if not all paths hit a node, the number of hits/repetitions for *oprD* goes down as well. Since the genomic position information is missing here, there is no conflict with two nodes being touched simultaneously.
 
@@ -628,6 +628,35 @@ vg paths -v FivePsaeAnnotAll.vg -L | wc -l
 
 The file annotated with the reduced annotation contains 3497 paths, the new one with all features annotated contains 30578 paths. While this is a lot, the file sizes of the vg graphs are not so different, with 144M and 153M, respectively. At least this annotation should provide me with all information I need to analyse the features of my selected reference genomes and find them in our clinical isolates.
 
+Can I also now use it to find "the real" *oprD* of the PAK genome in my graph?
+
+```bash
+vg paths -x FivePsaeAnnotAll.xg -X -Q "oprD" > FivePsaeAnnotAlloprD.gam
+vg view -a FivePsaeAnnotAlloprD.gam | jq -r '([.path.mapping[].position.node_id | unique | tostring] | join("\n"))' > oprDAll_nodes.txt
+vg find -N oprDAll_nodes.txt -x FivePsaeAnnotAll.xg -c 10 | vg view -v - > FivePsaeAnnotAlloprD_nodes.vg
+vg index -x FivePsaeAnnotAlloprD_nodes.xg FivePsaeAnnotAlloprD_nodes.vg
+vg viz -x FivePsaeAnnotAlloprD_nodes.xg -o ../pics/FivePsaeAnnotAlloprD_nodes.svg
+```
+
+I extracted all paths that have "oprD" in their name to a gam file and then extracted the nodes for each path. The file *oprDAll_nodes.txt* contains the four paths I expected for the four annotated *oprD*s (I checked that before generating the current version which only contains one node ID per line). Again, I end up with a lot of warnings due to duplicated nodes which I cannot easily avoid using `jq` so far:
+
+```
+[vg] warning: node ID 495192 appears multiple times. Skipping.
+[vg] warning: node ID 931095 appears multiple times. Skipping.
+[vg] warning: node ID 495194 appears multiple times. Skipping.
+```
+
+Loading the index into IVG results in an easy answer to my question: Y880_RS01600 is *oprD* in PAK:
+
+![Start of IVG representation of a sub-graph with all oprD paths]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes_IVG.PNG" | relative_url }})  
+*Start of IVG representation of a sub-graph with all oprD paths*
+
+Scrolling through the sub-graph, the path of Y880_RS01600 mostly follows the one of *oprD* in PAO1, but there are some differences. The same can also be seen in the `vg viz` representation: [*`vg viz` representation of a sub-graph with all oprD paths (SVG)*]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes.svg" | relative_url }})
+
+![Start of vg viz representation of a sub-graph with all oprD paths]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes.PNG" | relative_url }})  
+*Start of `vg viz` representation of a sub-graph with all oprD paths*
+
+I'm pretty excited to see that there are no other paths (from all five complete annotations!) found that touch the nodes that are touched by the different *oprD* genes. If this works with other genes as well, this could be an interesting application to complete genome annotations.
 
 ### Finding inversions
 
