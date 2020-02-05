@@ -13,6 +13,7 @@ playground/day1/real_data/*
 playground/day1/sim_reads/*
 playground/day2/*
 playground/day3/*
+playground/vg/*
 
 !playground/day1/allele_frequency/filter_vcf_maxAF.sh
 !playground/day1/allele_frequency/filter_vcf_minAF.sh
@@ -22,4 +23,5 @@ playground/day3/*
 !playground/day2/pics/
 !playground/day2/nodespergene.R
 !playground/day3/references/annotation/
-!playground/day3/pics
+!playground/day3/pics/
+!playground/day3/references/sideQuest/

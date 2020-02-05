@@ -564,21 +564,21 @@ vg viz -x FivePsaeoprD2_nodes.xg -o ../pics/FivePsaeoprD2_nodes.svg
 
 This ran without any error messages, so I now have the svg files for both versions of *oprD* (one path and four).
 
-![Start of vg viz representation of a sub-graph with a merged oprD path]({{ "/playground/day3/pics/FivePsaeoprD_nodes.PNG" | relative_url }})  
-*Start of `vg viz` representation of a sub-graph with a merged oprD path*
+![Start of the vg viz representation of a sub-graph with a merged oprD path]({{ "/playground/day3/pics/FivePsaeoprD_nodes.PNG" | relative_url }})  
+*Start of the `vg viz` representation of a sub-graph with a merged oprD path*
 
-![Start of vg viz representation of a sub-graph with four oprD paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes.PNG" | relative_url }})  
-*`vg viz` representation of a sub-graph with four oprD paths*
+![Start of the vg viz representation of a sub-graph with four oprD paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes.PNG" | relative_url }})  
+*Start of the `vg viz` representation of a sub-graph with four oprD paths*
 
 This graph representation nicely shows that nodes are covered multiple times by the merged *oprD* path. It's a bit difficult to directly compare it to the graph with the four *oprD* paths, since the order of the nodes is different, but I think it's safe to presume that the number of repeats for a node correlates to the number of actual paths going through it in the second graph.
 
 I also used the [Sequence Tube Map](https://vgteam.github.io/sequenceTubeMap/) online tool to visualise my sub-graphs in a different format. Here, the nodes are in the same order, but the number of repetition per node is not shown.
 
-![Start of IVG representation of a sub-graph with a merged oprD path]({{ "/playground/day3/pics/FivePsaeoprD_nodes_IVG.PNG" | relative_url }})  
-*Start of IVG representation of a sub-graph with a merged oprD path*
+![Start of the IVG representation of a sub-graph with a merged oprD path]({{ "/playground/day3/pics/FivePsaeoprD_nodes_IVG.PNG" | relative_url }})  
+*Start of the IVG representation of a sub-graph with a merged oprD path*
 
-![Start of IVG representation of a sub-graph with four oprD paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes_IVG.PNG" | relative_url }})  
-*Start of IVG representation of a sub-graph with four oprD paths*
+![Start of the IVG representation of a sub-graph with four oprD paths]({{ "/playground/day3/pics/FivePsaeoprD2_nodes_IVG.PNG" | relative_url }})  
+*Start of the IVG representation of a sub-graph with four oprD paths*
 
 When scrolling through the graph with only one *oprD* path, it's interesting to see that the path is not following a single reference path, but instead seems to jump from one genome to the next. I assume that (at least in this tool?) part of the information does get overwritten, so if at one position the path should hit multiple nodes, only one is selected (but how?). In these cases, the `vg viz` representation is much clearer - if not all paths hit a node, the number of hits/repetitions for *oprD* goes down as well. Since the genomic position information is missing here, there is no conflict with two nodes being touched simultaneously.
 
@@ -648,19 +648,39 @@ I extracted all paths that have "oprD" in their name to a gam file and then extr
 
 Loading the index into IVG results in an easy answer to my question: Y880_RS01600 is *oprD* in PAK:
 
-![Start of IVG representation of a sub-graph with all oprD paths]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes_IVG.PNG" | relative_url }})  
-*Start of IVG representation of a sub-graph with all oprD paths*
+![Start of the IVG representation of a sub-graph with all oprD paths]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes_IVG.PNG" | relative_url }})  
+*Start of the IVG representation of a sub-graph with all oprD paths*
 
 Scrolling through the sub-graph, the path of Y880_RS01600 mostly follows the one of *oprD* in PAO1, but there are some differences. The same can also be seen in the `vg viz` representation: [*`vg viz` representation of a sub-graph with all oprD paths (SVG)*]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes.svg" | relative_url }})
 
-![Start of vg viz representation of a sub-graph with all oprD paths]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes.PNG" | relative_url }})  
-*Start of `vg viz` representation of a sub-graph with all oprD paths*
+![Start of the vg viz representation of a sub-graph with all oprD paths]({{ "/playground/day3/pics/FivePsaeAnnotAlloprD_nodes.PNG" | relative_url }})  
+*Start of the `vg viz` representation of a sub-graph with all oprD paths*
 
 I'm pretty excited to see that there are no other paths (from all five complete annotations!) found that touch the nodes that are touched by the different *oprD* genes. If this works with other genes as well, this could be an interesting application to complete genome annotations.
 
 ### Finding inversions
 
-A question that came up a few times in group discussions about genome graphs was about inversions. In theory, graphs should show even big genomic inversions just fine, but I'm not entirely sure how this works when the basis for the graph is a multiple sequence alignment. The [publication](https://www.nature.com/articles/35023079) of the PAO1 genome describes a large inversion (more than one-quarter of the genome) compared to a previously mapped isolate, and another [publication](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2006-7-10-r90) describes this inversion as being between PA14 and PAO1. It resulted from a homologous recombination event between the rRNAs *rrnA* and *rrnB* and should be visible in the graph. The overview generated with [`odgi viz`](#odgiviz) might already be showing that, but I still find it a little hard to interpret.
+A question that came up a few times in group discussions about genome graphs was about inversions. In theory, graphs should show even big genomic inversions just fine, but I'm not entirely sure how this works when the basis for the graph is a multiple sequence alignment.
+
+The [publication](https://www.nature.com/articles/35023079) of the PAO1 genome describes a large inversion (more than one-quarter of the genome) compared to a previously mapped isolate, and another [publication](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2006-7-10-r90) describes this inversion as being between PA14 and PAO1. It resulted from a homologous recombination event between the rRNAs *rrnA* and *rrnB* and should be visible in the graph. The overview generated with [`odgi viz`](#odgiviz) might already be showing that, but I still find it a little hard to interpret.
+
+A quick check could be to look at either the rRNA clusters where the recombination event took place, or at example genes that are located in the inverted or not inverted parts of the genome. For example, *rhl*, endocing the ATP-dependent RNA helicase RhlB, is on the positive strand in PAO1 (PA3861), but on the negative strand in PA14 (PA14_14040), while *dnaA*, encoding the chromosomal replication initiator protein DnaA, as the first gene in the annotation is on the positive strand of both strains.
+
+```bash
+vg paths -x FivePsaeAnnotAll.xg -X -Q "rhl" > FivePsaeAnnotAll_oprD_rhl.gam
+vg view -a FivePsaeAnnotAll_oprD_rhl.gam | jq '{name: .name, nodes: ([.path.mapping[].position.is_reverse | tostring] | join(","))}'
+```
+
+This results in an output of different *rhl* genes (including *rhlR* and others) and for each node they touch whether that is reversed or not. The *rhl* genes (listed for PA14, PAO1, LESB58 and PA7) are all reversed.  
+Upon closer inspection, this makes sense. The gene might be located in the genomes with different orientations, but it is still read in the same direction, so the path will traverse it in the same direction no matter from which reference it comes.
+
+What about *rrnA* and *rrnB*, then? It would be interesting to see the region surrounding those genes. In the [PAO1 paper](https://www.nature.com/articles/35023079), *rrnA* is located approximately between bases 722096 and 727255, and *rrnB* is in the region 4788574 to 4793731. While there is no direct reference to these clusters by name or location in PA14, gene encoding the same features (5S, 16S and 23S rRNA together with tRNA for alanine and isoleucine) can be found in similar regions: 733095 to 738251 and 4952020 to 4957169.
+
+It's a pity that it's not possible to simply find these genomic locations in the graph, and I think it's also not possible to select a gene/feature and to specifically extract its surroundings, as I believe this only works with node IDs. Therefore, I will have to either decide which nodes to extract, or which annotated features.
+
+
+
+
 
 
 ## Open questions
