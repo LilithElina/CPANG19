@@ -7,10 +7,10 @@ author: LilithElina
 
 ## Finding *ras1*, *ris1* and *tse6* in my reference genome graph
 
-There was a [publication in Nature](https://www.nature.com/articles/s41586-019-1735-9) last year that showed that *Pseudomonas aeruginosa* strain PA14 has replaced the C-terminus of Tse6, a type VI secretion system effector protein in strain PAO1, to generate a different inter-bacterial toxin. This new toxin, named Ras1, comes with its own immunity protein (Ris1), since the one effective against Tse6 doesn't work on this new protein.
+There was a [publication in Nature](https://www.nature.com/articles/s41586-019-1735-9) last November that showed that *Pseudomonas aeruginosa* strain PA14 has replaced the C-terminus of Tse6, a type VI secretion system effector protein in strain PAO1, to generate a different inter-bacterial toxin. This new toxin, named Ras1, comes with its own immunity protein (Ris1), since the one effective against Tse6 (Tsi6) doesn't work on this new protein.
 
 Of course we were interested to see how these differences are represented in the reference genome graph I already have, and what these genes look like in our clinical *P. aeruginosa* isolates.  
-The genes of interest are: PA0093 (*tse6*), PA14_01140 (annotated as *tse6*, now named *ras1*), PA14_01130 (*ris1*, but not annotated as that yet).
+The genes of interest are: PA0093 (*tse6*), PA14_01140 (annotated as *tse6*, now named *ras1*), and PA14_01130 (*ris1*, but not annotated as that yet).
 
 ```bash
 vg paths -x FivePsaeAnnotAll.xg -X -Q "tse6" > sideQuest/FivePsaeAnnotAll_tse6.gam
@@ -25,9 +25,8 @@ vg viz -x FivePsaeAnnotAll_nodes.xg -o FivePsaeAnnotAll_nodes.svg
 
 I combined the nodes I found using `vg path` and `vg view` on the genes of interest into one file manually, and also removed duplicates from there to avoid error messages. I am still not a fan of the `vg viz` version of visualising sub-graphs, so I didn't have an in-depth look at this one.
 
-![Region of interest visualised with `vg viz`]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes.svg" | relative_url }})
-<img src="{{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes.svg" | relative_url }}">
-*Region of interest visualised with `vg viz`*
+[![Region of interest visualised with `vg viz`]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes.svg" | relative_url }})]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes.svg" | relative_url }})
+*Region of interest visualised with `vg viz`* (click to zoom)
 
 Instead, I visualised the sub-graph with [IVG](https://vgteam.github.io/sequenceTubeMap/) and learned an important lesson: IVG uses a path of your choice as reference for the graph to display. This was apparent here because the part of *tse6* that is not homologous in PAO1 and PA14 was only displayed as a single node - either for PAO1 or PA14, depending which reference path (PA0093 or PA14_01140) was chosen.
 
@@ -47,6 +46,8 @@ All these sub-graph variations show how similar the first part of the gene is (i
 It would be nice to be able to move outside of the selected path's frame of reference to see, for example, the whole sequence of the PA7 version of *tse6*/*ras1*. As it is, you have to select that gene as the reference path and reload the graph; this reveals that there is another node of 536 nucleotides which marks the end of the PA7 gene (PSPA7_067). For comparison: the PA14 specific node of *ras1* is 607 nucleotides long, and the node of the other references containing *tse6* is 540 bases long.
 
 I also had a look at *ris1* (the immunity conferring gene) and it only appears in PA14 as a single 233 nucleotide long node. I assume PA7 contains yet another effector and immunity gene/protein pair which could be interesting to analyse.
+
+### Going into the details
 
 To see if it is possible to display the divergent region of *ras1*/*tse6*, I again tried to create a PDF file from `vg view`, but still received the same error message as before (at some point in my [day 3 protocol]({{ site.baseurl }}{% post_url 2019-11-13-bacteria_exercises_protocol %})).
 
@@ -145,9 +146,30 @@ graph path 'refseq|NC_002516.2|chromosome' invalid: edge from 12429 end to 12462
 [vg view] warning: graph is invalid!
 ```
 
-![Region of interest visualised with `dot`]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes_dot.svg" | relative_url }})
-<img src="{{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes_dot.svg" | relative_url }}">
-*Region of interest visualised with `dot`*
+[![Region of interest visualised with `dot`]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes_dot.svg" | relative_url }})]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes_dot.svg" | relative_url }})
+*Region of interest visualised with `dot`* (click to zoom)
 
 Except for the invalid edge because of a missing node, this actually worked. Still, I would prefer to get PDFs as well... Apparently we have Pango installed, but it's not connected to graphviz anymore. So far, the only solution I could find is to re-install graphviz, but conda would remove A LOT of other programs if I tried to remove it first, and that is not an option right now.
 
+In any case, this sub-graph representation is not very helpful without the annotated paths. To keep things as simple as possible, I'm going to add the paths, but remove the sequences from the nodes.
+
+```bash
+vg view -dpS FivePsaeAnnotAll_nodes.vg | dot -Tsvg -o pics/FivePsaeAnnotAll_nodes_paths_dot.svg
+```
+
+I still get the same error about the missing node, but I won't show it here again.
+
+[![Simplified region of interest visualised with `dot` including paths]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes_paths_dot.svg" | relative_url }})]({{ "/playground/day3/references/sideQuest/pics/FivePsaeAnnotAll_nodes_paths_dot.svg" | relative_url }})
+*Simplified region of interest visualised with `dot` including paths* (click to zoom)
+
+The nice thing about this format is that you can do text searches on it. That makes it easier to find for example PA14_01130 (*ris1*), which is only present with two nodes - one of 223 bp length, and one with an additional 10 bp which the gene shares with *ras1* (PA14_01140). That is a little irritating, since there is no mention of the two genes overlapping, but looking at the annotation it's true: *ris1* start at 111205 and *ras1* ends at 111195 (remember, the genes are on the negative strand). I could not see this in IVG.
+
+This representation of the sub-graph shows that there are two beginnings to the graph on the left side, representing multiple genes I am not interested in right now. One is for PA7 alone, the other represents the other strains and separates at the end of *tsi6* (the *tse6* immunity gene). Then, *ras1* and *tse6* start at the same position, but on different branches. The third branch still only belongs to PA7, with PSPA7_0166 and PSPA7_0167. PA14 and PA7 merge at node 711086 for 16 bp (with one single variant) before merging with the other strains again at node 12473. From then on, there is only one branch for all strains with smaller variations.
+
+While this representation might not look as nice as a sequence tube map, it's easier to understand as everything is there to see, you only have to find it.
+
+### The operon in PA7
+
+This topic is quite fascinating. In [PAO1](http://pseudomonas.com/feature/show/?id=102919&view=operons), the predicted operon for this T6SS effector and immunity complex contains three genes: *tsi6*, *tse6*, and *eagT6* (a chaperone for Tse6). It is located on the negative strand, surrounded by genes on the positive strand.  
+The predicted operon in [PA14](http://pseudomonas.com/feature/show/?id=1651025&view=operons) consists of *tsi6*, PA14_01130 (*ris1*), and *tse6*/*ras1*. Adjacent and also on the negative strand is again *eagT6*, but it's apparently not counted into the operon.  
+The same operon in [PA7](http://pseudomonas.com/feature/show/?id=1663126&view=operons) contains only genes annotated as hypothetical so far (even though *tse6* is basically as close to the PAO1 version as in PA14). It consists of five genes: PSPA_0164 to PSPA_0168. Analogous to the other strains (and based on the graph as well) PSPA_0167 is a version of *tse6*/*ras1* and PSPA_0168 is *eagT6* (96.7% blastn identity in PAK and PA14). The other three genes don't match anything else in the graph, even though PSPA7_0165 is listed as ortholog to *tsi6* in PAO1 and PA14. PSPA_0164 doesn't even have any orthologs listed on [pseudomonas.com](http://pseudomonas.com/orthologs/list?id=1663120), and PSPA_0166 only has orthologs annotated as hypothetical in less well known strains.
