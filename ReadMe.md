@@ -5,7 +5,7 @@ Go to the [official course website](http://gtpb.igc.gulbenkian.pt/bicourses/2019
 
 **This repo contains notes, edits, and results added by [@LilithElina](https://github.com/LilithElina) after participating in the course.**
 
-**This project has moved to [GitLab](https://gitlab.com/LilithElina/cpang) with a new [webpage](https://cpang.netlify.com/) published with Netlify.
+**This project has moved to [GitLab](https://gitlab.com/LilithElina/cpang) with a new [webpage](https://cpang.netlify.com/) published with Netlify.**
 
 ---
 
